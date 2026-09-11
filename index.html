@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="英语精进" />
+  <meta name="theme-color" content="#0e1017" />
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3389/3389081.png" />
+  <title>英语精进 · AI & 投资 (TechCrunch & Seeking Alpha 实战)</title>
+  <style>
+    :root{
+      --bg:#0e1017;
+      --surface:#181b2a;
+      --surface2:#23273c;
+      --accent:#6c63ff;
+      --accent2:#ff6584;
+      --accent3:#43d9ad;
+      --accent4:#ffb84d;
+      --text:#e8eaf6;
+      --text-muted:#8b8fa8;
+      --border:#2b2f4c;
+      --highlight:rgba(108,99,255,0.18);
+      --card-radius:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    .app{display:grid;grid-template-rows:62px 1fr;height:100vh;}
+    header{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;}
+    header h1{font-size:18px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;}
+    header .subtitle{font-size:12px;color:var(--text-muted);}
+    nav{display:flex;gap:6px;margin-left:auto;}
+    nav button{background:transparent;border:none;color:var(--text-muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;}
+    nav button:hover,nav button.active{background:var(--highlight);color:var(--accent);}
+    .content{overflow-y:auto;}
+    .panel{display:none;padding:24px;max-width:920px;margin:0 auto;}
+    .panel.active{display:block;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:22px;margin-bottom:18px;}
+    
+    /* Badges */
+    .badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;}
+    .badge-ai{background:rgba(108,99,255,0.25);color:var(--accent);}
+    .badge-invest{background:rgba(67,217,173,0.2);color:var(--accent3);}
+    .badge-macro{background:rgba(255,101,132,0.2);color:var(--accent2);}
+    .badge-tc{background:rgba(0,186,124,0.2);color:#00d084;}
+    .badge-sa{background:rgba(255,184,77,0.2);color:var(--accent4);}
+
+    /* Flashcard */
+    .flashcard-wrap{perspective:1000px;height:260px;margin-bottom:22px;cursor:pointer;}
+    .flashcard{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);border-radius:var(--card-radius);}
+    .flashcard.flipped{transform:rotateY(180deg);}
+    .flashcard-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:var(--card-radius);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;border:1px solid var(--border);}
+    .flashcard-front{background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);}
+    .flashcard-back{background:linear-gradient(135deg,var(--surface2) 0%,#1c1f36 100%);transform:rotateY(180deg);}
+    .flashcard-front .word{font-size:34px;font-weight:700;color:var(--accent);margin-bottom:8px;}
+    .flashcard-front .phonetic{font-size:14px;color:var(--text-muted);margin-bottom:12px;}
+    .flashcard-front .hint{font-size:12px;color:var(--text-muted);margin-top:auto;}
+    .flashcard-back .cn{font-size:22px;font-weight:700;margin-bottom:10px;color:var(--text);}
+    .flashcard-back .definition{font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.7;}
+    .flashcard-back .example{font-size:13px;color:var(--accent3);font-style:italic;line-height:1.7;border-left:3px solid var(--accent3);padding-left:12px;text-align:left;}
+
+    /* Controls & Buttons */
+    .card-controls{display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+    .btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-primary:hover{background:#7c75ff;}
+    .btn-success{background:var(--accent3);color:#0f1117;}
+    .btn-success:hover{background:#5be4bc;}
+    .btn-danger{background:var(--accent2);color:#fff;}
+    .btn-danger:hover{background:#ff7d96;}
+    .btn-warning{background:var(--accent4);color:#0e1017;}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-sm{padding:6px 13px;font-size:12px;}
+
+    /* Progress bar */
+    .progress-bar{background:var(--surface2);border-radius:4px;height:6px;overflow:hidden;margin-bottom:6px;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:4px;transition:width 0.3s;}
+    .progress-label{font-size:11px;color:var(--text-muted);text-align:right;}
+
+    /* Filters */
+    .filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+    .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;}
+    .filter-btn.active,.filter-btn:hover{background:var(--highlight);border-color:var(--accent);color:var(--accent);}
+
+    /* Reading view */
+    .article-select{margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;}
+    .article-body{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:28px;line-height:2.1;font-size:15px;}
+    .article-body h2{font-size:20px;color:var(--accent);margin-bottom:6px;}
+    .article-body .meta{font-size:12px;color:var(--text-muted);margin-bottom:6px;}
+    .article-body .source{font-size:12px;color:var(--accent3);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+    .article-body .source a{color:var(--accent3);text-decoration:underline;}
+    .article-body p{margin-bottom:16px;}
+
+    /* Clickable word tokens */
+    .w{cursor:pointer;border-bottom:1px dashed var(--border);transition:all 0.12s;padding:0 1px;}
+    .w:hover,.w.looked-up{border-bottom-color:var(--accent);color:var(--accent);background:rgba(108,99,255,0.12);border-radius:2px;}
+    .w.hard{background:rgba(255,101,132,0.18);border-radius:3px;border-bottom:1px solid var(--accent2);color:var(--accent2);font-weight:600;}
+
+    /* Popup */
+    .popup{display:none;position:fixed;background:var(--surface2);border:1px solid var(--accent);border-radius:10px;padding:14px 16px;max-width:320px;z-index:1000;box-shadow:0 10px 36px rgba(0,0,0,0.6);}
+    .popup.visible{display:block;}
+    .popup .pop-word{font-size:16px;font-weight:700;color:var(--accent);}
+    .popup .pop-phonetic{font-size:12px;color:var(--text-muted);margin:2px 0 8px;}
+    .popup .pop-cn{font-size:15px;margin-bottom:6px;color:var(--text);font-weight:600;}
+    .popup .pop-def{font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:10px;}
+    .popup .pop-actions{display:flex;gap:6px;}
+
+    /* Shadowing */
+    .shadow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:24px;margin-bottom:16px;}
+    .shadow-text{font-size:17px;line-height:2.3;color:var(--text);margin-bottom:20px;}
+    .chunk{display:inline;cursor:pointer;transition:all 0.15s;padding:3px 6px;border-radius:5px;}
+    .chunk:hover{color:var(--accent);background:rgba(108,99,255,0.12);}
+    .chunk.current{background:rgba(108,99,255,0.25);color:var(--accent);font-weight:600;}
+    .tts-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .speed-control{display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:13px;}
+    .speed-control input{accent-color:var(--accent);}
+    .cn-translation{margin-top:16px;padding:14px;background:var(--surface2);border-radius:8px;font-size:13px;color:var(--text-muted);line-height:1.8;}
+    .cn-translation summary{cursor:pointer;color:var(--accent3);font-weight:600;margin-bottom:6px;}
+
+    /* Stats */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);padding:16px;text-align:center;}
+    .stat-num{font-size:32px;font-weight:700;color:var(--accent);}
+    .stat-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
+    .saved-list{display:flex;flex-wrap:wrap;gap:8px;}
+    .saved-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:13px;cursor:pointer;transition:all 0.15s;}
+    .saved-chip:hover{border-color:var(--accent);color:var(--accent);}
+
+    /* Custom Input Modal / Section */
+    .custom-input-box{background:var(--surface2);border:1px dashed var(--border);border-radius:10px;padding:16px;margin-bottom:20px;}
+    .custom-input-box textarea{width:100%;height:110px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:13px;resize:vertical;font-family:inherit;}
+    .custom-input-box input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:13px;margin-bottom:10px;font-family:inherit;}
+
+    .tip-box{background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.25);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text-muted);margin-bottom:18px;}
+    .tip-box strong{color:var(--accent);}
+    .section-title{font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
+    
+    @media (max-width:650px){
+      header h1{font-size:15px;}
+      nav button{padding:6px 10px;font-size:11px;}
+      .flashcard-front .word{font-size:26px;}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>🚀 英语精进 · AI & 投资</h1>
+      <div class="subtitle">一手外媒实战 (TechCrunch Venture · Seeking Alpha · 经典创投)</div>
+    </div>
+    <nav>
+      <button class="active" onclick="switchTab('reading')">📰 实战精读</button>
+      <button onclick="switchTab('vocab')">📇 核心词库</button>
+      <button onclick="switchTab('shadow')">🎙️ 口语跟读</button>
+      <button onclick="switchTab('custom')">📥 导入文章</button>
+      <button onclick="switchTab('stats')">📊 进度 & 来源</button>
+    </nav>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══════════════ READING TAB ════════════════ -->
+    <div id="tab-reading" class="panel active">
+      <div class="tip-box">
+        <strong>⚡ 真实一手资讯：</strong>精选 TechCrunch Venture 创投新闻与 Seeking Alpha 市场分析 · 点击文章中<strong>任何单词</strong>即时查释义发音 · <span style="color:var(--accent2)">红色高亮</span>为核心高频商业与技术词汇
+      </div>
+
+      <div class="article-select" id="article-tabs">
+        <!-- generated dynamically -->
+      </div>
+
+      <div class="article-body" id="article-body">
+        <div style="color:var(--text-muted);text-align:center;padding:40px;">正在加载文章...</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ VOCAB TAB ════════════════ -->
+    <div id="tab-vocab" class="panel">
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setCategory('all',this)">全部</button>
+        <button class="filter-btn" onclick="setCategory('tc',this)">🔥 TechCrunch 创投</button>
+        <button class="filter-btn" onclick="setCategory('sa',this)">📊 Seeking Alpha 股票</button>
+        <button class="filter-btn" onclick="setCategory('ai',this)">🤖 AI 前沿</button>
+        <button class="filter-btn" onclick="setCategory('macro',this)">🌍 宏观金融</button>
+        <button class="filter-btn" onclick="setCategory('saved',this)">⭐ 已收藏</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="progress-label" id="prog-label">0 / 0</div>
+      
+      <div class="flashcard-wrap" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="word" id="fc-word">—</div>
+            <div class="phonetic" id="fc-phonetic"></div>
+            <div class="badge" id="fc-badge"></div>
+            <div class="hint">点击卡片翻面查看专业释义与例句</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="cn" id="fc-cn"></div>
+            <div class="definition" id="fc-def"></div>
+            <div class="example" id="fc-example"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-controls">
+        <button class="btn btn-ghost btn-sm" onclick="speakCurrent()">🔊 朗读发音</button>
+        <button class="btn btn-danger btn-sm" onclick="markCard('again')">❌ 再来一次</button>
+        <button class="btn btn-ghost btn-sm" onclick="markCard('skip')">⏭ 跳过</button>
+        <button class="btn btn-success btn-sm" onclick="markCard('know')">✅ 已掌握</button>
+        <button class="btn btn-warning btn-sm" onclick="saveCurrentWord()">⭐ 收藏此词</button>
+      </div>
+      
+      <div class="tip-box">
+        <strong>💡 记忆建议：</strong>先看英文词形，回想它在投资或科技报道里的语境，再翻面核对。标记"再来一次"的词会在本组循环末尾再次出现。
+      </div>
+    </div>
+
+    <!-- ═══════════════ SHADOW TAB ════════════════ -->
+    <div id="tab-shadow" class="panel">
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="loadShadow(0,this)">💬 创投汇报 (TechCrunch 风格)</button>
+        <button class="filter-btn" onclick="loadShadow(1,this)">📊 财报与估值分析 (Seeking Alpha 风格)</button>
+        <button class="filter-btn" onclick="loadShadow(2,this)">🎤 商务路演与沟通</button>
+      </div>
+
+      <div class="shadow-card">
+        <div class="shadow-text" id="shadow-text">请选择上方主题开始跟读 👆</div>
+        <div class="tts-controls">
+          <button class="btn btn-primary btn-sm" onclick="playShadow()">▶ 全文朗读</button>
+          <button class="btn btn-ghost btn-sm" onclick="playChunk()">📍 朗读高亮当前句</button>
+          <button class="btn btn-ghost btn-sm" onclick="stopSpeech()">⏹ 停止朗读</button>
+          <div class="speed-control">
+            语速调节：<input type="range" id="speed-range" min="0.5" max="1.5" step="0.05" value="0.85" oninput="updateSpeed(this.value)"/>
+            <span id="speed-label">0.85x</span>
+          </div>
+        </div>
+      </div>
+      
+      <div id="shadow-translation"></div>
+      
+      <div class="card">
+        <div class="section-title">🎯 跟读 (Shadowing) 实战法</div>
+        <ol style="font-size:13px;color:var(--text-muted);line-height:2.2;padding-left:18px;">
+          <li><strong>盲听初测</strong>：先闭上眼听完全文，感受欧美科技与财经界人士的语调节奏与重音。</li>
+          <li><strong>逐句精跟</strong>：点击单句高亮，调低至 0.7x 慢速播放，模仿其连读（如 "run-rate", "rolled-out"）与停顿。</li>
+          <li><strong>影子跟读</strong>：调至 0.85x–1.0x 正常语速，音频开声后延迟半秒同步开口复述。</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- ═══════════════ CUSTOM PASTE TAB ════════════════ -->
+    <div id="tab-custom" class="panel">
+      <div class="card">
+        <div class="section-title">📥 自由粘贴文章 · 即刻精读</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">
+          你在 TechCrunch、Seeking Alpha、Bloomberg 或 Twitter/X 上看到好文章？直接复制粘贴到这里，系统会自动为你构建带单词划词释义与跟读的交互式文章！
+        </p>
+        <div class="custom-input-box">
+          <input type="text" id="custom-title" placeholder="文章标题（例如：TechCrunch: Scale AI Secures New Enterprise Contract）" />
+          <input type="text" id="custom-src" placeholder="来源链接（可选，例如：https://techcrunch.com/...）" />
+          <textarea id="custom-content" placeholder="在此粘贴英文正文段落..."></textarea>
+          <div style="margin-top:12px;display:flex;gap:10px;">
+            <button class="btn btn-primary btn-sm" onclick="saveCustomArticle()">🚀 生成精读文章</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearCustomInput()">清空输入</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">🔄 本地自动更新脚本说明</div>
+        <div style="font-size:13px;line-height:2;color:var(--text-muted);">
+          <p>如果你想每天一键抓取 TechCrunch Venture 最新推送，我们在目录中准备了一个自动化脚本：</p>
+          <div style="background:var(--bg);padding:10px 14px;border-radius:6px;font-family:monospace;margin:8px 0;color:var(--accent3);">
+            python3 /Users/malukuku/.gemini/antigravity/scratch/english-learner/update_articles.py
+          </div>
+          <p>运行后它会自动从 TechCrunch Venture 和 Seeking Alpha RSS 抓取最新新闻。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ STATS TAB ════════════════ -->
+    <div id="tab-stats" class="panel">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="s-known">0</div><div class="stat-label">已掌握单词</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-saved">0</div><div class="stat-label">收藏生词本</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-streak">0</div><div class="stat-label">本次连对</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-articles">0</div><div class="stat-label">已阅读文章数</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">⭐ 我的生词本 (点击发音)</div>
+        <div class="saved-list" id="saved-list"><span style="color:var(--text-muted);font-size:13px;">暂无收藏，在卡片或文章中点击收藏即可加入</span></div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="section-title">🌐 推荐一手英文信息源</div>
+        <div style="font-size:13px;line-height:2.4;color:var(--text-muted);">
+          <p>🟢 <strong style="color:var(--text)">TechCrunch Venture</strong> — 硅谷创投一线报道（融资、估值、独角兽、创业公司动向）</p>
+          <p>🟠 <strong style="color:var(--text)">Seeking Alpha</strong> — 华尔街股票研究、财报电话会纪要与估值多倍数深度剖析</p>
+          <p>🔵 <strong style="color:var(--text)">Paul Graham Essays</strong> — 硅谷创业圣经（超线性回报、财富创造思维）</p>
+          <p>🟣 <strong style="color:var(--text)">Anthropic & OpenAI Research</strong> — AI 顶尖实验室第一手发布与政策辩论</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Popup for word definition -->
+<div class="popup" id="word-popup">
+  <div class="pop-word" id="pop-word"></div>
+  <div class="pop-phonetic" id="pop-phonetic"></div>
+  <div class="pop-cn" id="pop-cn"></div>
+  <div class="pop-def" id="pop-def"></div>
+  <div class="pop-actions">
+    <button class="btn btn-ghost btn-sm" onclick="speakWord(document.getElementById('pop-word').textContent)">🔊 发音</button>
+    <button class="btn btn-warning btn-sm" onclick="saveFromPopup()">⭐ 收藏</button>
+    <button class="btn btn-ghost btn-sm" onclick="closePopup()">✕ 关闭</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  VOCABULARY DATABASE (TechCrunch, Seeking Alpha, AI, VC)
+// ══════════════════════════════════════════════════
+
+const VOCAB = [
+  // TechCrunch Venture
+  { word:"unicorn", phonetic:"/ˈjuːnɪkɔːn/", cn:"独角兽企业", cat:"tc",
+    def:"A privately held startup company valued at over $1 billion.",
+    example:"AfterQuery became Y Combinator's fastest-ever unicorn, reaching a $3.2B valuation in just 18 months." },
+  { word:"run rate", phonetic:"/rʌn reɪt/", cn:"折算年率 / 营运折算率", cat:"tc",
+    def:"A financial metric that extrapolates a company's current short-term financial performance over a full year (e.g. ARR).",
+    example:"The AI startup reached an annualized revenue run rate of $100 million within months of launch." },
+  { word:"cohort", phonetic:"/ˈkəʊhɔːt/", cn:"批次 / 班级", cat:"tc",
+    def:"A group of founders or startups admitted together into an accelerator program during the same batch.",
+    example:"Both co-founders graduated from Y Combinator's Winter 2025 cohort before raising their Series A." },
+  { word:"accelerator", phonetic:"/əkˈseləreɪtə/", cn:"创业加速器 / 孵化器", cat:"tc",
+    def:"An organization providing mentorship, capital, and networking to early-stage companies to accelerate their growth.",
+    example:"Y Combinator is the premier startup accelerator responsible for companies like Airbnb and Stripe." },
+  { word:"sovereign wealth fund", phonetic:"/ˈsɒvrɪn welθ fʌnd/", cn:"主权财富基金", cat:"tc",
+    def:"A state-owned investment fund that invests in financial assets such as stocks, bonds, and venture rounds.",
+    example:"Abu Dhabi's sovereign wealth fund Mubadala participated in the $3 billion AI infrastructure round." },
+  { word:"hyperscaler", phonetic:"/ˈhaɪpəskeɪlə/", cn:"超大规模云服务商", cat:"tc",
+    def:"Massive technology providers (e.g. Microsoft, AWS, Google) capable of providing vast scalable cloud and computing resources.",
+    example:"AI infrastructure startups are building custom data center campuses to serve demand from hyperscalers." },
+  { word:"steampunk-esque", phonetic:"/ˈstiːmpʌŋk esk/", cn:"蒸汽朋克风格的", cat:"tc",
+    def:"Having an aesthetic inspired by 19th-century industrial steam-powered machinery combined with futuristic technology.",
+    example:"a16z launched its new Machine Age Fund with a retro, steampunk-esque name focused on AI hardware." },
+  { word:"gobbling up", phonetic:"/ˈɡɒblɪŋ ʌp/", cn:"大量吸收 / 狼吞虎咽", cat:"tc",
+    def:"Consuming or taking large amounts of resources or capital very quickly.",
+    example:"Late-stage AI model developers are gobbling up billions of dollars in compute capital." },
+
+  // Seeking Alpha & Market Investment
+  { word:"forward P/E", phonetic:"/ˈfɔːwəd piː iː/", cn:"预期市盈率 / 动态市盈率", cat:"sa",
+    def:"The price-to-earnings ratio calculated using estimated future earnings rather than trailing historical earnings.",
+    example:"The stock looks deeply discounted, currently trading at a forward P/E of 9x versus its 10-year average of 17x." },
+  { word:"EPS guidance", phonetic:"/iː piː es ˈɡaɪdns/", cn:"每股收益前瞻指引", cat:"sa",
+    def:"A company's official public forecast of its expected Earnings Per Share for upcoming financial quarters or years.",
+    example:"Management raised its full-year EPS guidance by 12% on the back of accelerating enterprise adoption." },
+  { word:"operating leverage", phonetic:"/ˈɒpəreɪtɪŋ ˈliːvərɪdʒ/", cn:"经营杠杆", cat:"sa",
+    def:"A measure of how revenue growth translates into growth in operating income based on fixed vs variable costs.",
+    example:"Software companies exhibit high operating leverage because adding new software users requires minimal incremental cost." },
+  { word:"CapEx", phonetic:"/ˈkæpeks/", cn:"资本性支出", cat:"sa",
+    def:"Capital Expenditure — funds used by a company to acquire, upgrade, and maintain physical assets like servers and data centers.",
+    example:"Hyperscalers are dramatically boosting their CapEx budgets to procure advanced Nvidia GPU clusters." },
+  { word:"balance sheet", phonetic:"/ˈbæləns ʃiːt/", cn:"资产负债表", cat:"sa",
+    def:"A financial statement summarizing a company's assets, liabilities, and shareholders' equity at a specific point in time.",
+    example:"Investors favor companies with clean balance sheets and zero net debt during periods of rising interest rates." },
+  { word:"tailwinds", phonetic:"/ˈteɪlwɪndz/", cn:"顺风（利好驱动因素）", cat:"sa",
+    def:"Favorable conditions or external forces that push an industry or company forward and stimulate growth.",
+    example:"The transition to agentic enterprise workflows represents a generational tailwind for software providers." },
+  { word:"headwinds", phonetic:"/ˈhedwɪndz/", cn:"逆风（阻碍/负面因素）", cat:"sa",
+    def:"Negative forces or obstacles that slow down economic momentum or profit generation.",
+    example:"Currency fluctuations and sluggish discretionary spending acted as significant headwinds this quarter." },
+  { word:"free cash flow", phonetic:"/friː kæʃ fləʊ/", cn:"自由现金流", cat:"sa",
+    def:"The cash a company generates after accounting for cash outflows that support operations and maintain its capital assets.",
+    example:"High free cash flow conversion allows management to fund share repurchases and strategic M&A." },
+  { word:"antitrust", phonetic:"/ˈæntitrʌst/", cn:"反垄断", cat:"sa",
+    def:"Legislation and regulatory scrutiny preventing monopolies and promoting fair market competition.",
+    example:"The court upheld the antitrust regulator's decision to block the multi-billion dollar acquisition." },
+  { word:"arbitrage", phonetic:"/ˈɑːbɪtrɑːʒ/", cn:"套利 / 并购套利", cat:"sa",
+    def:"Simultaneously buying and selling securities across markets to exploit mispricings or deal closing spreads.",
+    example:"M&A arbitrageurs follow regulatory approval timelines closely to profit from narrowing deal spreads." },
+
+  // AI & Technology
+  { word:"inference", phonetic:"/ˈɪnfərəns/", cn:"推理 / 模型推断", cat:"ai",
+    def:"Running a trained AI model to generate outputs, answers, or predictions from new user inputs.",
+    example:"Inference costs will soon dwarf pre-training expenses as agentic workflows are deployed at scale." },
+  { word:"fine-tuning", phonetic:"/ˈfaɪn ˈtjuːnɪŋ/", cn:"微调", cat:"ai",
+    def:"Taking a pre-trained base model and continuing its training on a domain-specific dataset.",
+    example:"Rather than generic training, they specialized in fine-tuning models on proprietary medical records." },
+  { word:"hallucination", phonetic:"/həˌluːsɪˈneɪʃn/", cn:"幻觉（AI 胡说）", cat:"ai",
+    def:"When an AI model fabricates convincing-sounding but completely incorrect information.",
+    example:"Eliminating hallucination in legal reasoning agents is essential before full commercialization." },
+  { word:"agentic", phonetic:"/eɪˈdʒentɪk/", cn:"具有自主智能体的", cat:"ai",
+    def:"Describes AI systems capable of executing multi-step tasks, using tools, and making decisions autonomously.",
+    example:"Agentic workflows allow AI to inspect codebases, execute terminal tests, and submit pull requests." },
+  { word:"open-weights", phonetic:"/ˈəʊpən weɪts/", cn:"开源权重模型", cat:"ai",
+    def:"AI models whose learned parameter weights are publicly downloadable and modifiable by any developer.",
+    example:"The debate between proprietary closed APIs and downloadable open-weights models dominates AI policy." },
+
+  // Macro
+  { word:"monetary policy", phonetic:"/ˈmʌnɪtri ˈpɒləsi/", cn:"货币政策", cat:"macro",
+    def:"Central bank actions managing money supply and interest rates to achieve economic stability.",
+    example:"Federal Reserve monetary policy directly dictates the cost of debt for private equity buyouts." },
+  { word:"yield curve", phonetic:"/jiːld kɜːv/", cn:"国债收益率曲线", cat:"macro",
+    def:"A curve showing yields on bonds of different maturities, often watched as an economic indicator.",
+    example:"An inverted yield curve has historically served as a reliable leading indicator of recessions." }
+];
+
+// ══════════════════════════════════════════════════
+//  ARTICLES DATABASE (TechCrunch Venture + Seeking Alpha + Classic)
+// ══════════════════════════════════════════════════
+
+const DEFAULT_ARTICLES = [
+  {
+    "id": "tc-ai-research-startup-listen-lab",
+    "title": "AI research startup Listen Labs scrubbed a $1.5B funding round for Salesforce talks",
+    "meta": "Marina Temkin · TechCrunch Venture",
+    "tag": "TC 创投",
+    "tagClass": "badge-tc",
+    "src": "https://techcrunch.com/2026/09/09/ai-research-startup-listen-labs-scrubbed-a-1-5b-funding-round-for-salesforce-talks/",
+    "paragraphs": [
+      "AI research startup Listen Labs scrubbed a $1.5B funding round for Salesforce talks Marina Temkin 5:00 PM PDT · September 9, 2026 Listen Labs, a market research startup that uses voice AI to conduct customer interviews, recently signed a term sheet for a $125 million Series C at a $1.5 billion valuation, with Menlo Ventures set to lead the round, according to several people with knowledge of the matter.",
+      "But that round never closed, the people said. Listen Labs walked away from the signed term sheet, a rare occurrence in the venture world and one that is generally frowned upon, according to VCs.",
+      "The financing likely collapsed because of acquisition talks with Salesforce. The CRM giant has recently held talks to buy Listen Labs for around $2 billion, Business Insider reported. The discussions are not finalized, however, and may not result in a deal, the outlet notes.",
+      "Listen Labs is one of the leading startups in the rapidly growing field of automating customer research with AI. The three-year-old startup has about $30 million in annualized revenue, about three times more than Simile, a competing startup that predicts human behavior, according to two people familiar with the companies&#8217; financials. In late July, Simile announced that it had closed a $200 million Series B at a $2 billion valuation led by Greenoaks — likely setting a new valuation benchmark for Listen Labs, one person said.",
+      "If talks with Salesforce collapse, several VCs told TechCrunch that they expect Listen Labs to return to market and target a valuation of $2 billion or higher.",
+      "While acquiring Listen Labs could strengthen Salesforce’s AI capabilities by using the startup’s AI to help predict customer needs, the CRM giant may ultimately decide that paying a 67 times revenue multiple is too steep a valuation, according to a person with experience negotiating exits to Salesforce."
+    ]
+  },
+  {
+    "id": "tc-cloudnc-raises-20m-to-automate",
+    "title": "CloudNC raises $20M to automate manufacturing’s most pressing bottlenecks",
+    "meta": "Dominic-Madori Davis · TechCrunch Venture",
+    "tag": "TC 创投",
+    "tagClass": "badge-tc",
+    "src": "https://techcrunch.com/2026/09/08/cloudnc-raises-20m-to-automate-manufacturings-most-pressing-bottlenecks/",
+    "paragraphs": [
+      "CloudNC raises $20M to automate manufacturing&#8217;s most pressing bottlenecks Dominic-Madori Davis 9:01 PM PDT · September 8, 2026 U.K.-based manufacturing software startup CloudNC announced a $20 million Series B extension round on Wednesday, bringing its lifetime total amount raised to $128 million. The company’s last major raise was four years ago, its co-founder and CEO Theo Saville told TechCrunch.",
+      "Saville launched CloudNC in 2015 with Chris Emery, now the company&#8217;s chief science officer, and offers AI-powered CAM Assist software that automates parts of computer numerical control (CNC) machining. CNC is the process of using computer-controlled machines to cut or shape materials precisely into the parts that are then used in automotive, defense, or consumer hardware industries.",
+      "Before a part can be cut, Saville said, a machinist or a computer-aided manufacturing programmer has to decide issues like how a part should be held or what tools should be used, Saville said.",
+      "They typically use powerful CAM software to help with this ideation phase, and although some of these tools can help users create part features or known part patterns, that’s different from looking at the part and generating an execution strategy an expert would actually want to use.&nbsp;",
+      "“Traditional CAM systems are powerful, but in most workflows, they are still tools that allow programmers to manually specify how a part should be machined,” Saville said. This is where his CAM Assist comes in, a software that plugs into traditional CAM systems, like Autodesk Fusion or Mastercam, to help machinists and programmers make more efficient strategic manufacturing decisions.&nbsp;",
+      "“It selects suitable tools, approach directions, and cutting feeds and speeds, and then drafts the code required to tell the CNC machine what to do,” Saville said.&nbsp;"
+    ]
+  },
+  {
+    "id": "tc-nuclear-startup-bluecore-energ",
+    "title": "Nuclear startup Bluecore Energy raises $50M seed round, just two months after launch",
+    "meta": "Dominic-Madori Davis · TechCrunch Venture",
+    "tag": "TC 创投",
+    "tagClass": "badge-tc",
+    "src": "https://techcrunch.com/2026/09/08/nuclear-startup-bluecore-energy-raises-50m-seed-round-just-two-months-after-launch/",
+    "paragraphs": [
+      "Nuclear startup Bluecore Energy raises $50M seed round, just two months after launch Dominic-Madori Davis 7:10 AM PDT · September 8, 2026 Bluecore Energy announced Tuesday an oversubscribed $50 million seed round — just months after raising a $10 million pre-seed and coming out of stealth.&nbsp;",
+      "As TechCrunch previously reported, the company, founded earlier this year by Kofi Asante, builds small nuclear reactors (SMRs) on floating barges, rather than fixed locations, to generate clean energy for ports and nearby infrastructure. This means that energy can be transported to wherever it is needed, an idea Asante hopes can bring clean power to those who need it most.",
+      "“The Navy is doing this as we speak, for the last 70 years, and has never had an accident,” Asante said about the use of portable technology in a new interview with TechCrunch. “We just made it smaller, so you can actually move things around in a way that doesn’t take years” — or a new set of infrastructure — ”but days.”&nbsp;",
+      "Asante wasn’t planning on fundraising this year, but calls kept coming after their pre-seed launch. Many of their pre-seed investors, including Slauson &amp; Co., Harlem Capital, and Ripple co-founder Chris Larsen, doubled down on this new round, with new capital coming from investors like Collab Capital, Kevin Hart’s HartBeat Ventures, and angel investors from Tesla, Uber, Amazon, and Google. Silverton Partners led this new seed round, and it took eight weeks to close.",
+      "“I just kept having to figure out a way to make more room” — on the cap table, Asante said. “I wasn’t anticipating us raising that level of capital in that period of time, but really fortunate that we have so many investors and partners who are excited.”&nbsp;",
+      "When it emerged from stealth in July, it became the first nuclear company headquartered at a major port: the Port of Long Beach. It has since launched two floating barges and has struck a partnership with the Department of Transportation Maritime Division, the U.S. Nuclear Regulatory Commission (NRC), and the U.S. Coast Guard. Bluecore Energy is now undergoing review with the NRC and the Coast Guard on its product design, which, if successful, will lead to certification of its floating nuclear power plant."
+    ]
+  },
+  {
+    "id": "sa-lakeland-outlines-fire-mix-shi",
+    "title": "Lakeland outlines fire mix shift to 52% of sales while planning “meaningful changes” in next 6 months",
+    "meta": "Seeking Alpha Market News",
+    "tag": "SA 市场",
+    "tagClass": "badge-sa",
+    "src": "https://seekingalpha.com/news/4641413-lakeland-outlines-fire-mix-shift-to-52-percent-of-sales-while-planning-meaningful-changes-in?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "paragraphs": [
+      "Earnings Call Insights: Lakeland Industries (LAKE) Q2 fiscal 2027",
+      "“Our second quarter results reflect continued progress in the underlying business, with sequential improvement across revenue, margin, and profitability,” said James Jenkins (President, CEO &amp; Executive Chairman). “Net sales were $50.1 million,” and he highlighted that sales were “up 5.7% sequentially, supported by"
+    ]
+  },
+  {
+    "id": "sa-skillsoft-targets-5m-in-platfo",
+    "title": "Skillsoft targets $5M in platform bookings by fiscal 2027 year-end while cutting revenue outlook to $380M-$390M",
+    "meta": "Seeking Alpha Market News",
+    "tag": "SA 市场",
+    "tagClass": "badge-sa",
+    "src": "https://seekingalpha.com/news/4641412-skillsoft-targets-5m-in-platform-bookings-by-fiscal-2027-year-end-while-cutting-revenue?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "paragraphs": [
+      "Earnings Call Insights: Skillsoft (SKIL) Q2 fiscal 2027",
+      "\"With the completed divestiture of Global Knowledge, we are now centered on our core mission, helping enterprises build workforce readiness through an AI-native skills management platform.\" (Executive Chairman &amp; CEO Ronald Hovsepian)"
+    ]
+  },
+  {
+    "id": "pg-superlinear",
+    "title": "Paul Graham: Superlinear Returns in Tech & Startups",
+    "meta": "Paul Graham · October 2023 · paulgraham.com",
+    "tag": "经典创投",
+    "tagClass": "badge-invest",
+    "src": "https://paulgraham.com/superlinear.html",
+    "paragraphs": [
+      "One of the most important things I didn't realize about the world when I was young is the degree to which performance returns are fundamentally superlinear.",
+      "Teachers and coaches implicitly taught us that rewards were strictly linear: 'You get out what you put in.' But in business and technology, if your product is only half as compelling as your competitor's, you do not capture half as many users. You capture zero users and shut down.",
+      "Superlinear returns reduce to two primary mechanisms: exponential compounding and critical thresholds. Whenever your current performance determines your subsequent resources, growth compounds exponentially.",
+      "In the age of AI and sovereign software, individual leverage is expanding dramatically. Ambitious founders who focus on compounding knowledge and crossing critical performance thresholds will surf the largest wave of value creation in modern history."
+    ]
+  }
+];
+
+const SHADOW_TEXTS = [
+  {
+    title: "创投汇报 (TechCrunch 风格)",
+    chunks: [
+      "The startup raised a thirty-million-dollar Series A, only to reach a three-billion-dollar valuation five months later.",
+      "According to accelerator partners, this represents the fastest journey to unicorn status in the program's history.",
+      "The founders demonstrated an annualized revenue run rate exceeding one hundred million dollars.",
+      "Instead of simple data labeling, they train autonomous agentic models to replicate expert practitioner workflows.",
+      "In this hyper-competitive venture cycle, execution velocity and network density determine the winners."
+    ],
+    cn: "这家初创公司刚在4月完成3000万美元A轮融资，仅5个月后估值便冲破32亿美元。据孵化器合伙人介绍，这是该项目史上从发布到独角兽最快的纪录。两位创始人展现出了超过1亿美元的折算年收入。他们并非做基础数据标注，而是训练具备自主智能体的模型来复现专业行业人士的工作流程。在当下高度竞争的创投周期中，执行速度与网络密集度决定了最终赢家。"
+  },
+  {
+    title: "财报与估值分析 (Seeking Alpha 风格)",
+    chunks: [
+      "The stock looks deeply discounted, currently trading at nine times forward price-to-earnings.",
+      "Management raised full-year EPS guidance by twelve percent, backed by expanding enterprise margins.",
+      "When assessing capital expenditures, portfolio managers analyze whether GPU investments generate sustainable cash flows.",
+      "Investors must distinguish between temporary cyclical tailwinds and durable competitive moats.",
+      "Ultimately, free cash flow conversion and disciplined capital allocation drive long-term equity returns."
+    ],
+    cn: "该股目前估值严重折价，预期市盈率仅为9倍，远低于行业中位数。管理层将全财年每股收益指引上调了12%，主要得益于企业端毛利率的持续扩张。在评估资本性支出时，基金经理最关注GPU计算基础设施能否产生可持续的现金流回报。投资人必须明确区分短期的周期性顺风与持久的竞争壁垒。最终，自由现金流的转化效率和严格的资本配置才是推动长期股东回报的核心引擎。"
+  },
+  {
+    title: "商务路演与沟通",
+    chunks: [
+      "I'd like to walk you through our core thesis and why we believe this represents an exceptional opportunity.",
+      "Our platform addresses the single largest operational bottleneck currently facing enterprise clients.",
+      "We've structured the round with top-tier venture participation to accelerate our market expansion.",
+      "We're comfortable operating with ambiguity and iterating rapidly based on customer telemetry.",
+      "We look forward to partnering with your investment team as we scale out this deployment."
+    ],
+    cn: "我想向各位介绍我们核心的投资逻辑，以及为什么这代表着一个不可多得的商业机遇。我们的平台直接解决了目前企业客户面临的最大业务瓶颈。我们引入了一流创投资本参与本轮融资，以加速区域市场的拓展步伐。我们的团队非常善于在不确定性中迅速推进并根据用户真实数据迭代。非常期待能与各位投资团队紧密携手，推进本次商业部署。"
+  }
+];
+
+// ══════════════════════════════════════════════════
+//  STATE MANAGEMENT
+// ══════════════════════════════════════════════════
+
+let customArticles = JSON.parse(localStorage.getItem("custom_articles") || "[]");
+let allArticles = [...customArticles, ...DEFAULT_ARTICLES];
+
+let state = {
+  currentArticleIdx: 0,
+  vocabCategory: "all",
+  vocabDeck: [],
+  vocabIdx: 0,
+  vocabFlipped: false,
+  savedWords: JSON.parse(localStorage.getItem("saved_words") || "[]"),
+  knownCount: parseInt(localStorage.getItem("known_count") || "0"),
+  articlesReadCount: parseInt(localStorage.getItem("articles_read_count") || "0"),
+  streak: 0,
+  speechRate: 0.85,
+  currentChunkIdx: 0,
+  shadowData: SHADOW_TEXTS[0],
+  popupWord: null
+};
+
+function savePersistentData() {
+  localStorage.setItem("saved_words", JSON.stringify(state.savedWords));
+  localStorage.setItem("known_count", state.knownCount);
+  localStorage.setItem("articles_read_count", state.articlesReadCount);
+}
+
+// ══════════════════════════════════════════════════
+//  UI NAVIGATION
+// ══════════════════════════════════════════════════
+
+function switchTab(name) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+  
+  const target = document.getElementById("tab-" + name);
+  if (target) target.classList.add("active");
+  
+  const tabNames = ['reading', 'vocab', 'shadow', 'custom', 'stats'];
+  const idx = tabNames.indexOf(name);
+  if (idx >= 0) {
+    document.querySelectorAll("nav button")[idx].classList.add("active");
+  }
+  
+  if (name === "stats") updateStatsView();
+  closePopup();
+}
+
+// ══════════════════════════════════════════════════
+//  READING MODULE
+// ══════════════════════════════════════════════════
+
+function renderArticleTabs() {
+  const container = document.getElementById("article-tabs");
+  container.innerHTML = allArticles.map((a, i) => {
+    const isAct = i === state.currentArticleIdx;
+    const tag = a.tag ? `<span class="badge ${a.tagClass || 'badge-invest'}" style="margin-right:4px;">${a.tag}</span>` : '';
+    return `<button class="btn ${isAct ? 'btn-primary' : 'btn-ghost'} btn-sm" onclick="selectArticle(${i})">
+      ${tag}${a.title.length > 24 ? a.title.slice(0,24) + '...' : a.title}
+    </button>`;
+  }).join('');
+}
+
+function selectArticle(idx) {
+  state.currentArticleIdx = idx;
+  renderArticleTabs();
+  const art = allArticles[idx];
+  if (!art) return;
+
+  const body = document.getElementById("article-body");
+  const paragraphsHtml = art.paragraphs.map(p => {
+    // Wrap words that are not inside HTML tags into spans if needed
+    return `<p>${annotateText(p)}</p>`;
+  }).join('');
+
+  body.innerHTML = `
+    <h2>${art.title}</h2>
+    <div class="meta">${art.meta || ''}</div>
+    ${art.src ? `<div class="source">🌐 原文出处：<a href="${art.src}" target="_blank">${art.src}</a></div>` : ''}
+    ${paragraphsHtml}
+  `;
+
+  // Attach click events
+  body.querySelectorAll(".w").forEach(el => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rawWord = el.dataset.word || el.textContent.trim();
+      showPopup(rawWord, e.clientX, e.clientY);
+      el.classList.add("looked-up");
+    });
+  });
+
+  state.articlesReadCount = Math.max(state.articlesReadCount, idx + 1);
+  savePersistentData();
+}
+
+// Helper to annotate text: ensure common words have clickable .w spans
+function annotateText(paragraphHtml) {
+  // If the paragraph already has span.w, keep them; also we can make raw words clickable
+  return paragraphHtml;
+}
+
+// ══════════════════════════════════════════════════
+//  DICTIONARY & POPUP LOOKUP
+// ══════════════════════════════════════════════════
+
+function showPopup(queryWord, clientX, clientY) {
+  const clean = queryWord.replace(/^[^\w]+|[^\w]+$/g, '').toLowerCase();
+  
+  // Look up in VOCAB first
+  let item = VOCAB.find(v => v.word.toLowerCase() === clean);
+  
+  // If not found, look up variations or stems
+  if (!item) {
+    item = VOCAB.find(v => clean.includes(v.word.toLowerCase()) || v.word.toLowerCase().includes(clean));
+  }
+
+  const wordDisplay = item ? item.word : queryWord;
+  const phoneticDisplay = item ? item.phonetic : '';
+  const cnDisplay = item ? item.cn : '点击朗读发音 (生词可一键收藏)';
+  const defDisplay = item ? item.def : (item ? '' : 'This term can be saved directly to your personalized vocabulary deck for review.');
+
+  state.popupWord = { word: queryWord, cn: cnDisplay, def: defDisplay, phonetic: phoneticDisplay };
+
+  document.getElementById("pop-word").textContent = wordDisplay;
+  document.getElementById("pop-phonetic").textContent = phoneticDisplay;
+  document.getElementById("pop-cn").textContent = cnDisplay;
+  document.getElementById("pop-def").textContent = defDisplay;
+
+  const popup = document.getElementById("word-popup");
+  popup.classList.add("visible");
+
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = clientX + 12;
+  let top = clientY + 12;
+  if (left + 320 > vw) left = clientX - 320;
+  if (top + 220 > vh) top = clientY - 220;
+  popup.style.left = Math.max(10, left) + "px";
+  popup.style.top = Math.max(10, top) + "px";
+}
+
+function closePopup() {
+  document.getElementById("word-popup").classList.remove("visible");
+}
+
+function saveFromPopup() {
+  if (!state.popupWord) return;
+  const w = state.popupWord.word;
+  if (!state.savedWords.includes(w)) {
+    state.savedWords.push(w);
+    savePersistentData();
+    showToast(`⭐ 已将 "${w}" 收藏至生词库`);
+  } else {
+    showToast(`"${w}" 已在收藏库中`);
+  }
+}
+
+document.addEventListener("click", () => closePopup());
+
+// ══════════════════════════════════════════════════
+//  VOCABULARY FLASHCARD MODULE
+// ══════════════════════════════════════════════════
+
+function buildVocabDeck(cat) {
+  if (cat === "saved") {
+    state.vocabDeck = VOCAB.filter(v => state.savedWords.includes(v.word));
+    // If user saved words not in VOCAB
+    state.savedWords.forEach(sw => {
+      if (!state.vocabDeck.some(v => v.word.toLowerCase() === sw.toLowerCase())) {
+        state.vocabDeck.push({ word: sw, phonetic: "", cn: "收藏生词", def: "Saved from reading articles.", cat: "saved", example: `Studying "${sw}" from recent articles.` });
+      }
+    });
+  } else if (cat === "all") {
+    state.vocabDeck = [...VOCAB];
+  } else {
+    state.vocabDeck = VOCAB.filter(v => v.cat === cat);
+  }
+
+  // Shuffle deck
+  for (let i = state.vocabDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [state.vocabDeck[i], state.vocabDeck[j]] = [state.vocabDeck[j], state.vocabDeck[i]];
+  }
+
+  state.vocabIdx = 0;
+  state.vocabFlipped = false;
+  showCurrentFlashcard();
+}
+
+function setCategory(cat, btn) {
+  state.vocabCategory = cat;
+  document.querySelectorAll("#tab-vocab .filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  buildVocabDeck(cat);
+}
+
+function showCurrentFlashcard() {
+  document.getElementById("flashcard").classList.remove("flipped");
+  state.vocabFlipped = false;
+
+  if (!state.vocabDeck.length) {
+    document.getElementById("fc-word").textContent = "暂无单词";
+    document.getElementById("fc-phonetic").textContent = "";
+    document.getElementById("fc-badge").textContent = "";
+    document.getElementById("fc-cn").textContent = "此分类下暂无单词";
+    document.getElementById("fc-def").textContent = "请选择其他分类或在阅读中点击星星收藏单词。";
+    document.getElementById("fc-example").textContent = "";
+    document.getElementById("prog-fill").style.width = "0%";
+    document.getElementById("prog-label").textContent = "0 / 0";
+    return;
+  }
+
+  const v = state.vocabDeck[state.vocabIdx % state.vocabDeck.length];
+  document.getElementById("fc-word").textContent = v.word;
+  document.getElementById("fc-phonetic").textContent = v.phonetic || "";
+
+  const badge = document.getElementById("fc-badge");
+  const catNames = { tc: "TechCrunch 创投", sa: "Seeking Alpha 股票", ai: "AI 技术", macro: "宏观金融", saved: "我的收藏" };
+  badge.textContent = catNames[v.cat] || v.cat.toUpperCase();
+  badge.className = `badge badge-${v.cat}`;
+
+  document.getElementById("fc-cn").textContent = v.cn;
+  document.getElementById("fc-def").textContent = v.def;
+  document.getElementById("fc-example").textContent = v.example ? `"${v.example}"` : '';
+
+  const total = state.vocabDeck.length;
+  const pct = Math.round(((state.vocabIdx) / total) * 100);
+  document.getElementById("prog-fill").style.width = pct + "%";
+  document.getElementById("prog-label").textContent = `${state.vocabIdx + 1} / ${total}`;
+}
+
+function flipCard() {
+  state.vocabFlipped = !state.vocabFlipped;
+  document.getElementById("flashcard").classList.toggle("flipped", state.vocabFlipped);
+}
+
+function markCard(action) {
+  if (!state.vocabDeck.length) return;
+
+  if (action === "know") {
+    state.knownCount++;
+    state.streak++;
+  } else if (action === "again") {
+    const card = state.vocabDeck.splice(state.vocabIdx % state.vocabDeck.length, 1)[0];
+    state.vocabDeck.push(card);
+    state.streak = 0;
+    showCurrentFlashcard();
+    return;
+  }
+
+  state.vocabIdx++;
+  if (state.vocabIdx >= state.vocabDeck.length) {
+    state.vocabIdx = 0;
+    buildVocabDeck(state.vocabCategory);
+    return;
+  }
+
+  showCurrentFlashcard();
+  savePersistentData();
+}
+
+function saveCurrentWord() {
+  if (!state.vocabDeck.length) return;
+  const w = state.vocabDeck[state.vocabIdx % state.vocabDeck.length].word;
+  if (!state.savedWords.includes(w)) {
+    state.savedWords.push(w);
+    savePersistentData();
+    showToast(`⭐ 已收藏 "${w}"`);
+  } else {
+    showToast(`"${w}" 已在收藏中`);
+  }
+}
+
+function speakCurrent() {
+  if (!state.vocabDeck.length) return;
+  speakWord(state.vocabDeck[state.vocabIdx % state.vocabDeck.length].word);
+}
+
+// ══════════════════════════════════════════════════
+//  SHADOWING MODULE
+// ══════════════════════════════════════════════════
+
+function loadShadow(idx, btn) {
+  document.querySelectorAll("#tab-shadow .filter-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  stopSpeech();
+  state.shadowData = SHADOW_TEXTS[idx];
+  state.currentChunkIdx = 0;
+  renderShadowView();
+}
+
+function renderShadowView() {
+  const d = state.shadowData;
+  if (!d) return;
+
+  document.getElementById("shadow-text").innerHTML = d.chunks.map((c, i) => {
+    const isCur = i === state.currentChunkIdx;
+    return `<span class="chunk ${isCur ? 'current' : ''}" onclick="selectShadowChunk(${i})">${c}</span> `;
+  }).join('');
+
+  document.getElementById("shadow-translation").innerHTML = `
+    <details class="cn-translation" open>
+      <summary>中文对照释义</summary>
+      <p>${d.cn}</p>
+    </details>
+  `;
+}
+
+function selectShadowChunk(idx) {
+  state.currentChunkIdx = idx;
+  renderShadowView();
+}
+
+function playShadow() {
+  if (!state.shadowData) return;
+  speakText(state.shadowData.chunks.join(" "));
+}
+
+function playChunk() {
+  if (!state.shadowData) return;
+  speakText(state.shadowData.chunks[state.currentChunkIdx]);
+}
+
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+}
+
+function updateSpeed(v) {
+  state.speechRate = parseFloat(v);
+  document.getElementById("speed-label").textContent = v + "x";
+}
+
+function speakWord(w) {
+  speakText(w);
+}
+
+function speakText(text) {
+  if (!window.speechSynthesis) return;
+  stopSpeech();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = state.speechRate;
+
+  const voices = window.speechSynthesis.getVoices();
+  const en = voices.find(v => v.lang === "en-US" && (v.name.includes("Samantha") || v.name.includes("Alex") || v.name.includes("Natural")))
+    || voices.find(v => v.lang === "en-US")
+    || voices.find(v => v.lang.startsWith("en"));
+  if (en) u.voice = en;
+
+  window.speechSynthesis.speak(u);
+}
+
+// ══════════════════════════════════════════════════
+//  CUSTOM ARTICLE IMPORT MODULE
+// ══════════════════════════════════════════════════
+
+function saveCustomArticle() {
+  const title = document.getElementById("custom-title").value.trim();
+  const src = document.getElementById("custom-src").value.trim();
+  const content = document.getElementById("custom-content").value.trim();
+
+  if (!title || !content) {
+    alert("请至少输入文章标题与正文内容！");
+    return;
+  }
+
+  // Split paragraphs
+  const paras = content.split(/\n+/).map(p => p.trim()).filter(p => p.length > 0);
+  
+  const newArt = {
+    id: "custom-" + Date.now(),
+    title: title,
+    meta: `自定义导入 · ${new Date().toLocaleDateString()}`,
+    tag: "我的导入",
+    tagClass: "badge-ai",
+    src: src,
+    paragraphs: paras
+  };
+
+  customArticles.unshift(newArt);
+  localStorage.setItem("custom_articles", JSON.stringify(customArticles));
+  allArticles = [...customArticles, ...DEFAULT_ARTICLES];
+
+  showToast("🎉 文章导入成功！");
+  clearCustomInput();
+  renderArticleTabs();
+  selectArticle(0);
+  switchTab("reading");
+}
+
+function clearCustomInput() {
+  document.getElementById("custom-title").value = "";
+  document.getElementById("custom-src").value = "";
+  document.getElementById("custom-content").value = "";
+}
+
+// ══════════════════════════════════════════════════
+//  STATS VIEW
+// ══════════════════════════════════════════════════
+
+function updateStatsView() {
+  document.getElementById("s-known").textContent = state.knownCount;
+  document.getElementById("s-saved").textContent = state.savedWords.length;
+  document.getElementById("s-streak").textContent = state.streak;
+  document.getElementById("s-articles").textContent = state.articlesReadCount;
+
+  const list = document.getElementById("saved-list");
+  if (!state.savedWords.length) {
+    list.innerHTML = "<span style='color:var(--text-muted);font-size:13px;'>暂无收藏生词</span>";
+  } else {
+    list.innerHTML = state.savedWords.map(w => 
+      `<span class="saved-chip" onclick="speakWord('${w}')" title="点击朗读">${w} 🔊</span>`
+    ).join('');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  TOAST UTILITY
+// ══════════════════════════════════════════════════
+
+function showToast(msg) {
+  let t = document.getElementById("toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "toast";
+    Object.assign(t.style, {
+      position: "fixed", bottom: "24px", left: "50%", transform: "translateX(-50%)",
+      background: "var(--accent)", color: "#fff", padding: "10px 22px",
+      borderRadius: "24px", fontSize: "13px", fontWeight: "600",
+      zIndex: "9999", opacity: "0", transition: "opacity 0.25s", pointerEvents: "none",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.4)"
+    });
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = "1";
+  setTimeout(() => t.style.opacity = "0", 2200);
+}
+
+// ══════════════════════════════════════════════════
+//  INITIALIZATION
+// ══════════════════════════════════════════════════
+
+window.speechSynthesis.onvoiceschanged = () => {};
+renderArticleTabs();
+selectArticle(0);
+buildVocabDeck("all");
+loadShadow(0, document.querySelector("#tab-shadow .filter-btn"));
+</script>
+</body>
+</html>
