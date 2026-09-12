@@ -2,7 +2,8 @@
 """
 update_articles.py
 自动抓取 TechCrunch (Venture 创投) 和 Seeking Alpha (市场与商业投资) 最新一手文章，
-过滤广告与展位杂讯，提炼核心商业/技术难词，并自动将更新时间戳注入 index.html。
+过滤广告与杂讯，提炼核心商业/技术难词，并自动从今日新闻中提炼最新的口语跟读语料（带中文对照），
+同步注入 index.html。
 """
 
 import subprocess
@@ -10,6 +11,7 @@ import re
 import json
 import xml.etree.ElementTree as ET
 import os
+import urllib.parse
 from datetime import datetime, timezone, timedelta
 
 UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
@@ -40,13 +42,49 @@ def curl_fetch(url):
         print(f"  [Error] curl 请求失败: {e}")
         return ""
 
+def translate_sentence(text):
+    """自动将英文短句翻译为中文对照"""
+    clean = re.sub(r'<[^>]+>', '', text).strip()
+    if not clean or len(clean) < 10:
+        return ""
+    try:
+        url = 'https://api.mymemory.translated.net/get?q=' + urllib.parse.quote(clean[:450]) + '&langpair=en|zh-CN'
+        out = subprocess.run(['curl', '-s', url], capture_output=True, text=True, timeout=8).stdout
+        data = json.loads(out)
+        res = data.get('responseData', {}).get('translatedText', '')
+        # 如果返回的是原英文或报错，降级处理
+        if res and not res.startswith('MYMEMORY WARNING'):
+            return res
+    except Exception:
+        pass
+    return ""
+
 def highlight_keywords(text):
     """自动给文章中的核心商业与AI词汇包裹 <span class='w hard'>"""
     for w in AUTO_HIGHLIGHT_WORDS:
-        # 使用正则单词边界匹配
         pattern = re.compile(rf'\b({re.escape(w)})\b', re.IGNORECASE)
         text = pattern.sub(r'<span class="w hard" data-word="\1">\1</span>', text)
     return text
+
+def extract_spoken_chunks(paragraphs, max_chunks=4):
+    """从文章段落中提炼适合跟读练习的纯净口播单句"""
+    chunks = []
+    for p in paragraphs:
+        # 去除 HTML 标签
+        raw = re.sub(r'<[^>]+>', '', p).strip()
+        # 按句号、感叹号、问号切分句子
+        sentences = re.split(r'(?<=[.!?])\s+', raw)
+        for s in sentences:
+            s_clean = s.strip()
+            # 挑选 35~140 字符的自然句
+            if 35 <= len(s_clean) <= 140:
+                if not any(k in s_clean.lower() for k in ['click here', 'subscribe', 'view bio', 'terms', 'privacy']):
+                    chunks.append(s_clean)
+            if len(chunks) >= max_chunks:
+                break
+        if len(chunks) >= max_chunks:
+            break
+    return chunks
 
 def get_techcrunch_articles():
     print(">>> 正在从 TechCrunch Venture 抓取最新创投报道...")
@@ -55,7 +93,6 @@ def get_techcrunch_articles():
     if not xml_data:
         return articles
 
-    # 广告、展位、票务等过滤黑名单关键词
     NOISE_KEYWORDS = ['exhibit table', 'side event', 'disrupt 2026', 'tickets', 'deadline', 'apply for your', 'mark wahlberg']
 
     try:
@@ -67,7 +104,6 @@ def get_techcrunch_articles():
             creator = item.find('{http://purl.org/dc/elements/1.1/}creator')
             author = creator.text.strip() if creator is not None else 'TechCrunch'
 
-            # 过滤展会宣传与广告
             if any(k in title.lower() for k in NOISE_KEYWORDS):
                 continue
 
@@ -156,6 +192,74 @@ def get_seeking_alpha_articles():
         print(f"  [Warning] Seeking Alpha 解析错误: {e}")
     return articles
 
+def generate_daily_shadowing(articles):
+    """根据今日最新抓取的文章，动态生成今日专属口语跟读语料"""
+    print("\n>>> 正在根据今日一手文章生成【口语跟读】语料与中文对照...")
+    shadow_list = []
+
+    # 1. 创投头条跟读
+    if len(articles) > 0:
+        a = articles[0]
+        chunks = extract_spoken_chunks(a['paragraphs'], max_chunks=4)
+        if chunks:
+            print(f"  翻译主题 1 ({a['title'][:25]})...")
+            tr_parts = [translate_sentence(c) for c in chunks]
+            cn_full = " ".join([t for t in tr_parts if t]) or "今日创投一手报道口播练习，关注头部初创公司与顶级资本动向。"
+            shadow_list.append({
+                "badge": "🔥 创投口播",
+                "title": a['title'][:22] + "...",
+                "chunks": chunks,
+                "cn": cn_full
+            })
+
+    # 2. AI / 技术前沿口播
+    ai_candidates = [a for a in articles if 'ai' in a['title'].lower() or 'model' in a['title'].lower() or 'tech' in a['title'].lower()]
+    target_ai = ai_candidates[0] if ai_candidates else (articles[1] if len(articles) > 1 else None)
+    if target_ai:
+        chunks = extract_spoken_chunks(target_ai['paragraphs'], max_chunks=4)
+        if chunks:
+            print(f"  翻译主题 2 ({target_ai['title'][:25]})...")
+            tr_parts = [translate_sentence(c) for c in chunks]
+            cn_full = " ".join([t for t in tr_parts if t]) or "今日人工智能与技术创新焦点，掌握前沿科技表达。"
+            shadow_list.append({
+                "badge": "🤖 AI口播",
+                "title": target_ai['title'][:22] + "...",
+                "chunks": chunks,
+                "cn": cn_full
+            })
+
+    # 3. 市场分析 / 商业动态口播
+    sa_candidates = [a for a in articles if 'Seeking Alpha' in a['meta'] or 'SA' in a['tag']]
+    target_sa = sa_candidates[0] if sa_candidates else (articles[-1] if len(articles) > 2 else None)
+    if target_sa:
+        chunks = extract_spoken_chunks(target_sa['paragraphs'], max_chunks=4)
+        if chunks:
+            print(f"  翻译主题 3 ({target_sa['title'][:25]})...")
+            tr_parts = [translate_sentence(c) for c in chunks]
+            cn_full = " ".join([t for t in tr_parts if t]) or "今日华尔街与二级市场分析，提升商业与财务词汇语感。"
+            shadow_list.append({
+                "badge": "📊 市场口播",
+                "title": target_sa['title'][:22] + "...",
+                "chunks": chunks,
+                "cn": cn_full
+            })
+
+    # 4. 保留经典投资人沟通与路演（作为常驻基准材料）
+    shadow_list.append({
+        "badge": "🎤 商务表达",
+        "title": "商务路演与投资人沟通",
+        "chunks": [
+            "I'd like to walk you through our core thesis and why we believe this represents an exceptional opportunity.",
+            "Our platform addresses the single largest operational bottleneck currently facing enterprise clients.",
+            "We've structured the round with top-tier venture participation to accelerate our market expansion.",
+            "We're comfortable operating with ambiguity and iterating rapidly based on customer telemetry.",
+            "We look forward to partnering with your investment team as we scale out this deployment."
+        ],
+        "cn": "我想向各位介绍我们核心的投资逻辑，以及为什么这代表着一个不可多得的商业机遇。我们的平台直接解决了目前企业客户面临的最大业务瓶颈。我们引入了一流创投资本参与本轮融资，以加速区域市场的拓展步伐。我们的团队非常善于在不确定性中迅速推进并根据用户真实数据迭代。非常期待能与各位投资团队紧密携手，推进本次商业部署。"
+    })
+
+    return shadow_list
+
 def update_index_html(new_articles):
     html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html')
     if not os.path.exists(html_path):
@@ -169,25 +273,29 @@ def update_index_html(new_articles):
     bj_time = datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M')
     print(f"  当前北京时间时间戳: {bj_time}")
 
-    # 更新 HTML 中的展示时间戳
+    # 更新 HTML 中的展示时间戳（阅读标签和跟读标签）
     content = re.sub(
         r'id="last-update-time">.*?<',
         f'id="last-update-time">{bj_time}<',
         content
     )
+    content = re.sub(
+        r'id="shadow-update-time">.*?<',
+        f'id="shadow-update-time">{bj_time}<',
+        content
+    )
 
-    # 寻找 DEFAULT_ARTICLES 数组
-    match = re.search(r'const DEFAULT_ARTICLES\s*=\s*(\[.*?\]);', content, re.DOTALL)
-    if not match:
+    # 1. 寻找 DEFAULT_ARTICLES 数组并更新
+    match_articles = re.search(r'const DEFAULT_ARTICLES\s*=\s*(\[.*?\]);', content, re.DOTALL)
+    if not match_articles:
         print("[Error] 未能在 index.html 中定位到 DEFAULT_ARTICLES")
         return False
 
     try:
-        existing_articles = json.loads(match.group(1))
+        existing_articles = json.loads(match_articles.group(1))
     except Exception:
         existing_articles = []
 
-    # 保留经典文章（Paul Graham）
     classics = [a for a in existing_articles if 'paulgraham' in a.get('src', '') or 'superlinear' in a.get('id', '')]
     if not classics:
         classics = [{
@@ -206,13 +314,21 @@ def update_index_html(new_articles):
         }]
 
     updated_deck = new_articles + classics
-    new_json_str = json.dumps(updated_deck, ensure_ascii=False, indent=2)
-    
-    new_content = content[:match.start()] + f"const DEFAULT_ARTICLES = {new_json_str};" + content[match.end():]
-    with open(html_path, 'w', encoding='utf-8') as f:
-        f.write(new_content)
+    new_articles_json = json.dumps(updated_deck, ensure_ascii=False, indent=2)
+    content = content[:match_articles.start()] + f"const DEFAULT_ARTICLES = {new_articles_json};" + content[match_articles.end():]
 
-    print(f"\n✅ 成功将 {len(new_articles)} 篇最新一手报道及更新时间 [{bj_time}] 同步写入 index.html！")
+    # 2. 生成今日专属口语跟读语料并注入 SHADOW_TEXTS
+    new_shadow_texts = generate_daily_shadowing(new_articles)
+    match_shadow = re.search(r'const SHADOW_TEXTS\s*=\s*(\[.*?\]);', content, re.DOTALL)
+    if match_shadow:
+        new_shadow_json = json.dumps(new_shadow_texts, ensure_ascii=False, indent=2)
+        content = content[:match_shadow.start()] + f"const SHADOW_TEXTS = {new_shadow_json};" + content[match_shadow.end():]
+        print(f"✅ 成功将 {len(new_shadow_texts)} 组今日专属口语跟读语料注入 index.html！")
+
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    print(f"\n🎉 完美同步！精读文章与口语跟读均已更新至最新时间 [{bj_time}]！")
     return True
 
 if __name__ == '__main__':

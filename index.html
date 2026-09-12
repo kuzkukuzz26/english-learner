@@ -537,10 +537,17 @@
 
     <!-- ═══════════════ SHADOW TAB ════════════════ -->
     <div id="tab-shadow" class="panel">
-      <div class="filter-row">
-        <button class="filter-btn active" onclick="loadShadow(0,this)">💬 创投汇报 (TechCrunch 风格)</button>
-        <button class="filter-btn" onclick="loadShadow(1,this)">📊 财报与估值分析 (Seeking Alpha 风格)</button>
-        <button class="filter-btn" onclick="loadShadow(2,this)">🎤 商务路演与沟通</button>
+      <div class="update-banner">
+        <div class="update-status">
+          <span class="pulse-dot"></span>
+          <span>今日口语跟读语料已随一手新闻同步更新</span>
+          <span style="color: #64748b;">· 最近更新：<strong id="shadow-update-time" style="color:#0f172a;">2026-09-12 22:26</strong> (北京时间)</span>
+        </div>
+        <button class="btn-refresh" onclick="forceHardRefresh()">🔄 检查并强制刷新</button>
+      </div>
+
+      <div class="filter-row" id="shadow-tabs">
+        <!-- generated dynamically -->
       </div>
 
       <div class="shadow-card">
@@ -783,6 +790,18 @@ const DEFAULT_ARTICLES = [
     ]
   },
   {
+    "id": "sa-anthropic-ceo-amodei-calls-to-",
+    "title": "Anthropic CEO Amodei calls to 'slow the pace' of AI model improvements",
+    "meta": "Seeking Alpha Market News",
+    "tag": "SA 市场",
+    "tagClass": "badge-sa",
+    "src": "https://seekingalpha.com/news/4642266-anthropic-ceo-amodei-calls-slow-pace-ai-model-improvements?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "paragraphs": [
+      "In the face of potential risks, Anthropic (ANTHRO) CEO Dario Amodei said that the progress of improving AI model capabilities should be slowed down.",
+      "\"But over the last few months, I have become convinced that fully addressing the risks requires"
+    ]
+  },
+  {
     "id": "sa-notable-tech-headlines-for-the",
     "title": "Notable tech headlines for the week: Apple, Nvidia, Oracle in focus",
     "meta": "Seeking Alpha Market News",
@@ -792,17 +811,6 @@ const DEFAULT_ARTICLES = [
     "paragraphs": [
       "The tech sector remained in the spotlight this week as investors digested earnings reports from heavyweights including Oracle (ORCL) and Adobe (ADBE).",
       "The tech-focused Nasdaq Composite Index (COMP:IND) closed in the green on Friday. The Technology Select Sector SPDR Fund ("
-    ]
-  },
-  {
-    "id": "sa-notable-analyst-calls-this-wee",
-    "title": "Notable analyst calls this week: Lockheed Martin, Meta and Intel among top picks",
-    "meta": "Seeking Alpha Market News",
-    "tag": "SA 市场",
-    "tagClass": "badge-sa",
-    "src": "https://seekingalpha.com/news/4642209-notable-analyst-calls-this-week-lockheed-martin-meta-and-intel-among-top-picks?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
-    "paragraphs": [
-      "The S&amp;P 500 (SP500) closed in the green on Friday, after the week saw the latest consumer inflation report coming in largely in line with expectations, as well as earnings reports from companies including Oracle and Adobe."
     ]
   },
   {
@@ -823,37 +831,46 @@ const DEFAULT_ARTICLES = [
 
 const SHADOW_TEXTS = [
   {
-    title: "创投汇报 (TechCrunch 风格)",
-    chunks: [
-      "The startup raised a thirty-million-dollar Series A, only to reach a three-billion-dollar valuation five months later.",
-      "According to accelerator partners, this represents the fastest journey to unicorn status in the program's history.",
-      "The founders demonstrated an annualized revenue run rate exceeding one hundred million dollars.",
-      "Instead of simple data labeling, they train autonomous agentic models to replicate expert practitioner workflows.",
-      "In this hyper-competitive venture cycle, execution velocity and network density determine the winners."
+    "badge": "🔥 创投口播",
+    "title": "Khosla Ventures is ope...",
+    "chunks": [
+      "The new outpost will be in New York, on 14th Street, and is expected to open this fall.",
+      "This fall opening date is very vague in my mind.&#8221;",
+      "The move is notable partly because of how unusual it is for Khosla Ventures specifically.",
+      "&#8220;We don&#8217;t even have an SF office, so this is a very big step for us,&#8221; said Rabois."
     ],
-    cn: "这家初创公司刚在4月完成3000万美元A轮融资，仅5个月后估值便冲破32亿美元。据孵化器合伙人介绍，这是该项目史上从发布到独角兽最快的纪录。两位创始人展现出了超过1亿美元的折算年收入。他们并非做基础数据标注，而是训练具备自主智能体的模型来复现专业行业人士的工作流程。在当下高度竞争的创投周期中，执行速度与网络密集度决定了最终赢家。"
+    "cn": "新的前哨站将设在纽约第14街，预计将于今年秋季开放。 这个秋天的开幕日期在我的脑海里非常模糊。” 此举值得注意，部分原因是Khosla Ventures的不寻常之处。 Rabois说：「我们甚至没有旧金山办公室，所以这对我们来说是一个非常大的进步。」"
   },
   {
-    title: "财报与估值分析 (Seeking Alpha 风格)",
-    chunks: [
-      "The stock looks deeply discounted, currently trading at nine times forward price-to-earnings.",
-      "Management raised full-year EPS guidance by twelve percent, backed by expanding enterprise margins.",
-      "When assessing capital expenditures, portfolio managers analyze whether GPU investments generate sustainable cash flows.",
-      "Investors must distinguish between temporary cyclical tailwinds and durable competitive moats.",
-      "Ultimately, free cash flow conversion and disciplined capital allocation drive long-term equity returns."
+    "badge": "🤖 AI口播",
+    "title": "Y Combinator’s Garry T...",
+    "chunks": [
+      "AI labs should perhaps play the same game.",
+      "“I would do nothing,” he told CNBC in an interview earlier this week.",
+      "“We could argue that there should be an American distillation regime.”",
+      "a more robust set of open-weight options that aren’t Chinese."
     ],
-    cn: "该股目前估值严重折价，预期市盈率仅为9倍，远低于行业中位数。管理层将全财年每股收益指引上调了12%，主要得益于企业端毛利率的持续扩张。在评估资本性支出时，基金经理最关注GPU计算基础设施能否产生可持续的现金流回报。投资人必须明确区分短期的周期性顺风与持久的竞争壁垒。最终，自由现金流的转化效率和严格的资本配置才是推动长期股东回报的核心引擎。"
+    "cn": "人工智能实验室也许应该玩同样的游戏。 “我什么都不会做，”他在本周早些时候接受CNBC采访时表示。 “我们可以争辩说，应该有一个美国蒸馏制度。” 一组更强大的非中国的开放权重选项。"
   },
   {
-    title: "商务路演与沟通",
-    chunks: [
+    "badge": "📊 市场口播",
+    "title": "Anthropic CEO Amodei c...",
+    "chunks": [
+      "\"But over the last few months, I have become convinced that fully addressing the risks requires"
+    ],
+    "cn": "“但在过去的几个月里，我确信充分应对风险需要"
+  },
+  {
+    "badge": "🎤 商务表达",
+    "title": "商务路演与投资人沟通",
+    "chunks": [
       "I'd like to walk you through our core thesis and why we believe this represents an exceptional opportunity.",
       "Our platform addresses the single largest operational bottleneck currently facing enterprise clients.",
       "We've structured the round with top-tier venture participation to accelerate our market expansion.",
       "We're comfortable operating with ambiguity and iterating rapidly based on customer telemetry.",
       "We look forward to partnering with your investment team as we scale out this deployment."
     ],
-    cn: "我想向各位介绍我们核心的投资逻辑，以及为什么这代表着一个不可多得的商业机遇。我们的平台直接解决了目前企业客户面临的最大业务瓶颈。我们引入了一流创投资本参与本轮融资，以加速区域市场的拓展步伐。我们的团队非常善于在不确定性中迅速推进并根据用户真实数据迭代。非常期待能与各位投资团队紧密携手，推进本次商业部署。"
+    "cn": "我想向各位介绍我们核心的投资逻辑，以及为什么这代表着一个不可多得的商业机遇。我们的平台直接解决了目前企业客户面临的最大业务瓶颈。我们引入了一流创投资本参与本轮融资，以加速区域市场的拓展步伐。我们的团队非常善于在不确定性中迅速推进并根据用户真实数据迭代。非常期待能与各位投资团队紧密携手，推进本次商业部署。"
   }
 ];
 
@@ -876,6 +893,7 @@ let state = {
   streak: 0,
   speechRate: 0.85,
   currentChunkIdx: 0,
+  currentShadowIdx: 0,
   shadowData: SHADOW_TEXTS[0],
   popupWord: null
 };
@@ -1141,11 +1159,25 @@ function speakCurrent() {
 //  SHADOWING MODULE
 // ══════════════════════════════════════════════════
 
+function renderShadowTabs() {
+  const container = document.getElementById("shadow-tabs");
+  if (!container) return;
+  container.innerHTML = SHADOW_TEXTS.map((s, i) => {
+    const isAct = i === state.currentShadowIdx;
+    return `<button class="filter-btn ${isAct ? 'active' : ''}" onclick="loadShadow(${i}, this)">
+      ${s.badge || '🎙️'} ${s.title}
+    </button>`;
+  }).join('');
+}
+
 function loadShadow(idx, btn) {
-  document.querySelectorAll("#tab-shadow .filter-btn").forEach(b => b.classList.remove("active"));
-  if (btn) btn.classList.add("active");
+  state.currentShadowIdx = idx;
+  document.querySelectorAll("#tab-shadow .filter-btn").forEach((b, i) => {
+    if (i === idx) b.classList.add("active");
+    else b.classList.remove("active");
+  });
   stopSpeech();
-  state.shadowData = SHADOW_TEXTS[idx];
+  state.shadowData = SHADOW_TEXTS[idx] || SHADOW_TEXTS[0];
   state.currentChunkIdx = 0;
   renderShadowView();
 }
@@ -1306,7 +1338,8 @@ window.speechSynthesis.onvoiceschanged = () => {};
 renderArticleTabs();
 selectArticle(0);
 buildVocabDeck("all");
-loadShadow(0, document.querySelector("#tab-shadow .filter-btn"));
+renderShadowTabs();
+loadShadow(0);
 </script>
 </body>
 </html>
