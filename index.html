@@ -2,6 +2,10 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -92,6 +96,61 @@
       box-shadow: var(--card-shadow);
     }
     
+    
+    /* Update Status Banner */
+    .update-banner {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      color: #475569;
+    }
+    .update-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .btn-refresh {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-refresh:hover {
+      background: #f8fafc;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     /* Badges */
     .badge{
       font-size: 10px;
@@ -410,8 +469,17 @@
 
   <div class="content">
 
-    <!-- ═══════════════ READING TAB ════════════════ -->
+        <!-- ═══════════════ READING TAB ════════════════ -->
     <div id="tab-reading" class="panel active">
+      <div class="update-banner">
+        <div class="update-status">
+          <span class="pulse-dot"></span>
+          <span>云端每日自动同步已激活</span>
+          <span style="color: #64748b;">· 最近更新时间：<strong id="last-update-time" style="color:#0f172a;">2026-09-12 08:59</strong> (北京时间)</span>
+        </div>
+        <button class="btn-refresh" onclick="forceHardRefresh()">🔄 检查并强制刷新</button>
+      </div>
+
       <div class="tip-box">
         <strong>⚡ 真实一手资讯：</strong>精选 TechCrunch Venture 创投新闻与 Seeking Alpha 市场分析 · 点击文章中<strong>任何单词</strong>即时查释义发音 · <span style="color:var(--accent2)">红色高亮</span>为核心高频商业与技术词汇
       </div>
@@ -690,52 +758,51 @@ const DEFAULT_ARTICLES = [
     "tagClass": "badge-tc",
     "src": "https://techcrunch.com/2026/09/11/y-combinators-garry-tan-wants-u-s-open-weight-ai-labs-to-distill-frontier-models-too/",
     "paragraphs": [
-      "Y Combinator&#8217;s Garry Tan wants US open-weight AI labs to &#8216;distill&#8217; frontier models, too Julie Bort 1:59 PM PDT · September 11, 2026 When it comes to Chinese AI labs using distillation techniques to extract knowledge from frontier model makers, Y Combinator CEO Garry Tan is hoping regulators stay out of it. In fact, he thinks U.S. AI labs should perhaps play the same game.",
-      "“I would do nothing,” he told CNBC in an interview earlier this week. “We could argue that there should be an American distillation regime.”",
-      "He elaborated to TechCrunch that this means he wants smaller, American open-weight AI labs to use the same kind of training techniques on American frontier AI labs, giving the U.S. a more robust set of open-weight options that aren’t Chinese.",
-      "Distillation is when a model maker extensively prompts another model in order to learn how it works and reasons. It is commonly, and legitimately, used by AI labs to help train new models.",
-      "Anthropic this week released its second report alleging that Chinese labs are engaged in &#8220;illicit distillation attacks,&#8221; hiding their identities to distill without permission and relying on fraud and stolen credentials to do so. Anthropic CEO Dario Amodei had previously publicly called on U.S. regulators to crack down on distillation.",
-      "It&#8217;s notable that the commander of Silicon Valley&#8217;s prestigious and prolific startup accelerator doesn&#8217;t agree."
+      "Y Combinator&#8217;s Garry Tan wants US <span class=\"w hard\" data-word=\"open-weight\">open-weight</span> AI labs to &#8216;<span class=\"w hard\" data-word=\"distill\">distill</span>&#8217; <span class=\"w hard\" data-word=\"frontier\">frontier</span> models, too Julie Bort 1:59 PM PDT · September 11, 2026 When it comes to Chinese AI labs using <span class=\"w hard\" data-word=\"distillation\">distillation</span> techniques to extract knowledge from <span class=\"w hard\" data-word=\"frontier\">frontier</span> model makers, Y Combinator CEO Garry Tan is hoping regulators stay out of it. In fact, he thinks U.S. AI labs should perhaps play the same game.",
+      "“I would do nothing,” he told CNBC in an interview earlier this week. “We could argue that there should be an American <span class=\"w hard\" data-word=\"distillation\">distillation</span> regime.”",
+      "He elaborated to TechCrunch that this means he wants smaller, American <span class=\"w hard\" data-word=\"open-weight\">open-weight</span> AI labs to use the same kind of training techniques on American <span class=\"w hard\" data-word=\"frontier\">frontier</span> AI labs, giving the U.S. a more robust set of <span class=\"w hard\" data-word=\"open-weight\">open-weight</span> options that aren’t Chinese.",
+      "<span class=\"w hard\" data-word=\"Distillation\">Distillation</span> is when a model maker extensively prompts another model in order to learn how it works and reasons. It is commonly, and legitimately, used by AI labs to help train new models.",
+      "Anthropic this week released its second report alleging that Chinese labs are engaged in &#8220;illicit <span class=\"w hard\" data-word=\"distillation\">distillation</span> attacks,&#8221; hiding their identities to <span class=\"w hard\" data-word=\"distill\">distill</span> without permission and relying on fraud and stolen credentials to do so. Anthropic CEO Dario Amodei had previously publicly called on U.S. regulators to crack down on <span class=\"w hard\" data-word=\"distillation\">distillation</span>.",
+      "It&#8217;s notable that the commander of Silicon Valley&#8217;s prestigious and prolific startup <span class=\"w hard\" data-word=\"accelerator\">accelerator</span> doesn&#8217;t agree."
     ]
   },
   {
-    "id": "tc-one-week-left-to-book-your-exh",
-    "title": "One week left to book your exhibit table at TechCrunch Disrupt 2026",
-    "meta": "TechCrunch Events · TechCrunch Venture",
+    "id": "tc-thrive-capital-led-vcs-into-pr",
+    "title": "Thrive Capital led VCs into pro sports ownership; Collaborative Fund just upped that play",
+    "meta": "Connie Loizos · TechCrunch Venture",
     "tag": "TC 创投",
     "tagClass": "badge-tc",
-    "src": "https://techcrunch.com/2026/09/11/one-week-left-to-book-your-exhibit-table-at-techcrunch-disrupt-2026/",
+    "src": "https://techcrunch.com/2026/09/10/thrive-capital-showed-vcs-the-way-into-pro-sports-ownership-collaborative-fund-is-now-trying-its-own-version-of-the-same-play/",
     "paragraphs": [
-      "The exhibitor program gives your team a dedicated 6&#8242; × 30&#8243; table in the Expo Hall for all three days — a place to demo what you’re building, answer questions in real time, and turn passing traffic into meaningful conversations.",
-      "The real cost of waiting isn’t just missing a table. It’s missing the conversations, leads, and opportunities that could come from having your product in the room.",
-      "The deadline is September 18 at 11:59 p.m. PT — tables can sell out before then.",
-      "One week. Limited space. Don’t wait for the opportunity to disappear. Secure your exhibit table now.",
-      "When you purchase through links in our articles, we may earn a small commission. This doesn’t affect our editorial independence.",
-      "TechCrunch Events View Bio October 13 &#8211; 15 San Francisco Don&#8217;t miss out. The startup community will gather to answer a pivotal question: How do you build sustainably in the AI era?"
+      "Thrive Capital led VCs into pro sports ownership; Collaborative Fund just upped that play Connie Loizos 3:30 PM PDT · September 10, 2026 Collaborative Fund, the 15-year-old, New York-based generalist venture firm that has roughly $1 billion under management and that made early bets on Lyft, Reddit, Sweetgreen, and Olipop, among others, is taking a stake in the soccer club D.C. United and its stadium, Audi Field.",
+      "It&#8217;s the latest — and smallest — firm to try something that Thrive Capital opened the door to just months ago: turning venture money into pro sports ownership.",
+      "To recap, Joshua Kushner&#8217;s Thrive launched a new vehicle, Thrive Eternal, explicitly built to hold &#8220;iconic franchises and cultural institutions&#8221; for decades, funded by many of the same investors already in Thrive&#8217;s venture and growth funds. The firm kicked things off by announcing a stake in the San Francisco Giants. Months later, the same vehicle — with former Disney CEO Bob Iger, a Thrive partner, joining as co-owner — bought the Lakers outright for a record $12.5 billion.",
+      "That&#8217;s new. Historically, money has poured into pro sports two other ways: individual tech fortunes and private equity. For example, Vinod Khosla and his family agreed this summer to buy the Seattle Seahawks for a record $9.6 billion soon after the Khosla family also took a stake in the San Francisco 49ers alongside OpenAI chairman Bret Taylor. That was a personal-wealth play, the kind we&#8217;ve seen over and over.",
+      "Private equity firms have also been at this for years, including Sixth Street, which holds stakes in the Boston Celtics, the New England Patriots, and MLB&#8217;s San Francisco Giants; Ares, which owns a piece of the Miami Dolphins outright and separately financed Chelsea&#8217;s stadium plans through a $500 million preferred-equity deal; RedBird, which owns AC Milan outright and holds a minority stake in Fenway Sports Group, the holding company behind Liverpool and the Red Sox; and Arctos, with minority positions scattered across MLB, the NFL, the NBA, and European soccer. (Apollo, the newest entrant, has mostly stuck to sports financing deals so far rather than ownership stakes.)",
+      "Thrive and Collaborative are doing neither of those things. At the same time, the two firms’ approaches to sports ownership look very different. Thrive built a stand-alone, permanent-capital vehicle specifically to hold trophy assets. Collaborative is investing out of the same early-stage fund it uses to write seed and Series A checks, and treating the deal less like something to buy and hold and almost more like infrastructure."
     ]
   },
   {
-    "id": "sa-glencore-mercuria-pursuing-ven",
-    "title": "Glencore, Mercuria pursuing Venezuela aluminum smelter deal - Bloomberg",
+    "id": "sa-notable-tech-headlines-for-the",
+    "title": "Notable tech headlines for the week: Apple, Nvidia, Oracle in focus",
     "meta": "Seeking Alpha Market News",
     "tag": "SA 市场",
     "tagClass": "badge-sa",
-    "src": "https://seekingalpha.com/news/4642253-glencore-mercuria-pursuing-venezuela-aluminum-smelter-deal-bloomberg?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "src": "https://seekingalpha.com/news/4642239-notable-tech-headlines-for-the-week-apple-nvidia-oracle-in-focus?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
     "paragraphs": [
-      "Miner Glencore (GLCNF) (GLNCY) and commodities ​trader Mercuria Energy are among firms interested in a ‌potential deal for Venezuela's largest aluminum smelter, Bloomberg reported Friday.",
-      "The two companies are each in discussions with the Venezuelan government about ​a deal for the Venalum"
+      "The tech sector remained in the spotlight this week as investors digested earnings reports from heavyweights including Oracle (ORCL) and Adobe (ADBE).",
+      "The tech-focused Nasdaq Composite Index (COMP:IND) closed in the green on Friday. The Technology Select Sector SPDR Fund ("
     ]
   },
   {
-    "id": "sa-apollo-in-talks-to-acquire-j-j",
-    "title": "Apollo in talks to acquire J&J’s orthopedics unit - Bloomberg",
+    "id": "sa-notable-analyst-calls-this-wee",
+    "title": "Notable analyst calls this week: Lockheed Martin, Meta and Intel among top picks",
     "meta": "Seeking Alpha Market News",
     "tag": "SA 市场",
     "tagClass": "badge-sa",
-    "src": "https://seekingalpha.com/news/4642256-apollo-in-talks-to-acquire-j-and-j-s-orthopedics-unit-bloomberg?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
+    "src": "https://seekingalpha.com/news/4642209-notable-analyst-calls-this-week-lockheed-martin-meta-and-intel-among-top-picks?utm_source=feed_news_all&utm_medium=referral&feed_item_type=news",
     "paragraphs": [
-      "Apollo Global Management (APO) ​is in talks to acquire ‌Johnson &amp; Johnson's (JNJ) DePuy Synthes orthopedics unit in a deal that could value it at close ​to $20B, Bloomberg reported late Friday.",
-      "An agreement could be reached within several weeks, although"
+      "The S&amp;P 500 (SP500) closed in the green on Friday, after the week saw the latest consumer inflation report coming in largely in line with expectations, as well as earnings reports from companies including Oracle and Adobe."
     ]
   },
   {
