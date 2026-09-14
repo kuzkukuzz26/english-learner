@@ -1717,7 +1717,7 @@ ${userTrans}
   try {
     let responseText = '';
     if (provider === 'gemini') {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1726,7 +1726,12 @@ ${userTrans}
         })
       });
       const data = await res.json();
-      if (data.error) throw new Error(data.error.message || 'Gemini API Error');
+      if (data.error) {
+        throw new Error(data.error.message || 'Gemini 接口报错，请检查 Key 或网络连接');
+      }
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
+        throw new Error('AI 未返回有效内容（可能触发了安全拦截），请换一段试译重试');
+      }
       responseText = data.candidates[0].content.parts[0].text;
     } else {
       // OpenAI / DeepSeek compatible
