@@ -151,6 +151,164 @@
       color: var(--accent);
     }
 
+    
+    /* Translation Practice & AI Evaluation */
+    .para-card {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .para-card:last-child {
+      border-bottom: none;
+    }
+    .para-tools {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      align-items: center;
+    }
+    .btn-subtle {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-subtle:hover {
+      background: #eff6ff;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .trans-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 14px;
+      margin-top: 10px;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .trans-box textarea {
+      width: 100%;
+      min-height: 80px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #1e293b;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .trans-box textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+    .trans-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .ai-review-result {
+      background: #ffffff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-top: 14px;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .ai-review-result h4 {
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-score-badge {
+      display: inline-block;
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #a7f3d0;
+      font-size: 12px;
+      margin-left: 6px;
+    }
+
+    /* Modal for AI Key Settings */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      border: 1px solid #e2e8f0;
+      animation: modalPop 0.2s ease;
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .modal-body {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.7;
+    }
+    .modal-body input, .modal-body select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #0f172a;
+    }
+
     /* Badges */
     .badge{
       font-size: 10px;
@@ -477,6 +635,7 @@
           <span>云端每日自动同步已激活</span>
           <span style="color: #64748b;">· 最近更新时间：<strong id="last-update-time" style="color:#0f172a;">2026-09-12 08:59</strong> (北京时间)</span>
         </div>
+        <button class="btn-refresh" onclick="openAISettingsModal()">⚙️ AI 批改设置</button>
         <button class="btn-refresh" onclick="forceHardRefresh()">🔄 检查并强制刷新</button>
       </div>
 
@@ -543,6 +702,7 @@
           <span>今日口语跟读语料已随一手新闻同步更新</span>
           <span style="color: #64748b;">· 最近更新：<strong id="shadow-update-time" style="color:#0f172a;">2026-09-12 22:26</strong> (北京时间)</span>
         </div>
+        <button class="btn-refresh" onclick="openAISettingsModal()">⚙️ AI 批改设置</button>
         <button class="btn-refresh" onclick="forceHardRefresh()">🔄 检查并强制刷新</button>
       </div>
 
@@ -947,9 +1107,27 @@ function selectArticle(idx) {
   if (!art) return;
 
   const body = document.getElementById("article-body");
-  const paragraphsHtml = art.paragraphs.map(p => {
-    // Wrap words that are not inside HTML tags into spans if needed
-    return `<p>${annotateText(p)}</p>`;
+  const paragraphsHtml = art.paragraphs.map((p, pIdx) => {
+    const savedTrans = getSavedTranslation(art.id || idx, pIdx);
+    return `
+      <div class="para-card" id="para-card-${pIdx}">
+        <p class="para-text">${annotateText(p)}</p>
+        <div class="para-tools">
+          <button class="btn-subtle" onclick="toggleTransBox(${pIdx})">✍️ 我来试译这段</button>
+          <button class="btn-subtle" onclick="speakParagraph(${pIdx})">🔊 听本段发音</button>
+        </div>
+        <div class="trans-box" id="trans-box-${pIdx}" style="${savedTrans ? 'display:block;' : 'display:none;'}">
+          <textarea id="trans-input-${pIdx}" oninput="saveDraftTranslation(${pIdx})" placeholder="在此输入你的中文翻译，考察自己对创投术语、财务数据与长难句的理解...">${savedTrans || ''}</textarea>
+          <div class="trans-btns">
+            <button class="btn btn-primary btn-sm" onclick="evaluateTranslation(${pIdx})">🤖 AI 核对与批改</button>
+            <button class="btn btn-ghost btn-sm" onclick="copyAIPrompt(${pIdx})">📋 复制给任意外部 AI</button>
+            <button class="btn btn-ghost btn-sm" onclick="showReferenceTrans(${pIdx})">👀 查看参考译文</button>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="toggleTransBox(${pIdx})">▲ 收起</button>
+          </div>
+          <div class="ai-review-result" id="ai-review-${pIdx}" style="display:none;"></div>
+        </div>
+      </div>
+    `;
   }).join('');
 
   body.innerHTML = `
@@ -1334,6 +1512,260 @@ function showToast(msg) {
 //  INITIALIZATION
 // ══════════════════════════════════════════════════
 
+
+// ══════════════════════════════════════════════════
+//  TRANSLATION PRACTICE & AI REVIEW ENGINE
+// ══════════════════════════════════════════════════
+
+function toggleTransBox(pIdx) {
+  const box = document.getElementById('trans-box-' + pIdx);
+  if (!box) return;
+  const isHidden = box.style.display === 'none';
+  box.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    const input = document.getElementById('trans-input-' + pIdx);
+    if (input) input.focus();
+  }
+}
+
+function getCleanParaText(pIdx) {
+  const art = allArticles[state.currentArticleIdx];
+  if (!art || !art.paragraphs[pIdx]) return '';
+  return art.paragraphs[pIdx].replace(/<[^>]+>/g, '').trim();
+}
+
+function speakParagraph(pIdx) {
+  const text = getCleanParaText(pIdx);
+  if (text) speakText(text);
+}
+
+function getSavedTranslation(artId, pIdx) {
+  const store = JSON.parse(localStorage.getItem('user_translations') || '{}');
+  return store[`${artId}_${pIdx}`] || '';
+}
+
+function saveDraftTranslation(pIdx) {
+  const art = allArticles[state.currentArticleIdx];
+  if (!art) return;
+  const val = document.getElementById('trans-input-' + pIdx).value;
+  const store = JSON.parse(localStorage.getItem('user_translations') || '{}');
+  store[`${art.id || state.currentArticleIdx}_${pIdx}`] = val;
+  localStorage.setItem('user_translations', JSON.stringify(store));
+}
+
+// Open/Close AI Settings Modal
+function openAISettingsModal() {
+  const modal = document.getElementById('ai-settings-modal');
+  if (modal) {
+    document.getElementById('ai-key-input').value = localStorage.getItem('user_ai_key') || '';
+    document.getElementById('ai-provider').value = localStorage.getItem('user_ai_provider') || 'gemini';
+    updateProviderHint();
+    modal.classList.add('active');
+  }
+}
+
+function closeAISettingsModal() {
+  const modal = document.getElementById('ai-settings-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function updateProviderHint() {
+  const p = document.getElementById('ai-provider').value;
+  const hint = document.getElementById('ai-key-hint');
+  if (p === 'gemini') {
+    hint.innerHTML = '💡 <strong>如何获取免费 Key：</strong>前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#2563eb;text-decoration:underline;">Google AI Studio</a> 登录 Google 账号即可一键免费创建 Gemini API Key，无任何费用！';
+  } else if (p === 'deepseek') {
+    hint.innerHTML = '💡 <strong>DeepSeek API Key：</strong>在 <a href="https://platform.deepseek.com/" target="_blank" style="color:#2563eb;text-decoration:underline;">DeepSeek 开放平台</a> 获取，性价比极高，模型采用 deepseek-chat。';
+  } else {
+    hint.innerHTML = '💡 <strong>OpenAI API Key：</strong>在 <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#2563eb;text-decoration:underline;">OpenAI 平台</a> 获取，默认采用 gpt-4o-mini。';
+  }
+}
+
+function saveAISettings() {
+  const key = document.getElementById('ai-key-input').value.trim();
+  const provider = document.getElementById('ai-provider').value;
+  localStorage.setItem('user_ai_key', key);
+  localStorage.setItem('user_ai_provider', provider);
+  closeAISettingsModal();
+  showToast(key ? '✅ AI API Key 设置成功！' : 'ℹ️ 已清空 API Key');
+}
+
+// 1-Click Copy Prompt for any external AI (ChatGPT, Kimi, Claude, Doubao)
+function copyAIPrompt(pIdx) {
+  const rawEnglish = getCleanParaText(pIdx);
+  const userTrans = document.getElementById('trans-input-' + pIdx).value.trim();
+
+  if (!userTrans) {
+    showToast('⚠️ 请先在框中输入你的中文翻译哦～');
+    return;
+  }
+
+  const promptText = `你是一位精通硅谷创投（Venture Capital）和华尔街金融（Wall Street Equity Research）的双语翻译与投研专家。
+我正在进行一手专业英文精读，并尝试翻译了一段报道。请对我的中文翻译进行严谨、专业、建设性的批改点评：
+
+【英文原文】：
+${rawEnglish}
+
+【我的中文翻译】：
+${userTrans}
+
+请按以下格式清晰点评：
+1. 🎯 【综合评分】：X / 100 分（指出主要翻译亮点与理解偏差）
+2. 💡 【专业术语与句式辨析】：指出核心行业术语（如融资估值、AI模型、商业名词）及长难句修饰关系是否翻译得地道准确
+3. 💎 【专家级润色参考】：给出信达雅、符合专业财经与科技媒体（如晚点LatePost/华尔街日报风格）的中文译文`;
+
+  navigator.clipboard.writeText(promptText).then(() => {
+    showToast('📋 专业批改指令已复制！可直接粘贴到微信/ChatGPT/Kimi查看点评');
+  }).catch(() => {
+    prompt('请手动复制以下批改指令：', promptText);
+  });
+}
+
+// Show Baseline Reference Translation via MyMemory API
+function showReferenceTrans(pIdx) {
+  const resultBox = document.getElementById('ai-review-' + pIdx);
+  const rawEnglish = getCleanParaText(pIdx);
+  if (!resultBox) return;
+
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = '<em>⏳ 正在获取参考译文...</em>';
+
+  const url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(rawEnglish.slice(0, 450)) + '&langpair=en|zh-CN';
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      const trans = d.responseData && d.responseData.translatedText ? d.responseData.translatedText : '暂无机器参考译文';
+      resultBox.innerHTML = `
+        <h4>👀 基础参考译文 (机器对照)</h4>
+        <div style="background:#f8fafc;padding:10px 12px;border-radius:6px;border:1px solid #e2e8f0;margin-top:6px;">
+          <p style="color:#334155;line-height:1.7;">${trans}</p>
+        </div>
+        <p style="font-size:11px;color:#94a3b8;margin-top:6px;">提示：机器直译仅供大意参考。点击「🤖 AI 核对与批改」可获得深入专业评析。</p>
+      `;
+    })
+    .catch(() => {
+      resultBox.innerHTML = '<p style="color:#e11d48;">获取参考译文超时，请检查网络或点击「🤖 AI 深度核对」。</p>';
+    });
+}
+
+// In-app AI Evaluation Engine (Gemini / DeepSeek / OpenAI)
+async function evaluateTranslation(pIdx) {
+  const resultBox = document.getElementById('ai-review-' + pIdx);
+  const rawEnglish = getCleanParaText(pIdx);
+  const userTrans = document.getElementById('trans-input-' + pIdx).value.trim();
+
+  if (!userTrans) {
+    showToast('⚠️ 请先在框中输入你的中文翻译哦～');
+    return;
+  }
+
+  const apiKey = localStorage.getItem('user_ai_key');
+  const provider = localStorage.getItem('user_ai_provider') || 'gemini';
+
+  // If no API key configured, guide user
+  if (!apiKey) {
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = `
+      <h4>🤖 开启站内 AI 实时批改</h4>
+      <p style="margin-bottom:10px;color:#475569;">
+        你尚未配置 AI API Key。你可以：
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-primary btn-sm" onclick="openAISettingsModal()">🔑 免费配置 Gemini Key (10秒搞定)</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyAIPrompt(${pIdx})">📋 一键复制提示词发给外部 AI</button>
+      </div>
+      <p style="font-size:11.5px;color:#64748b;background:#eff6ff;padding:8px 10px;border-radius:6px;">
+        💡 推荐：前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#2563eb;text-decoration:underline;">Google AI Studio</a> 免费获取 Gemini Key，填入后即可享受在网页内秒级出评语的高级功能！
+      </p>
+    `;
+    copyAIPrompt(pIdx);
+    return;
+  }
+
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = '<div style="color:var(--accent);font-weight:600;">🤖 AI 导师正在深入剖析你的译文与金融术语... 请稍候 3~5 秒 ⏳</div>';
+
+  const systemPrompt = `你是一位精通硅谷创投（Venture Capital）和华尔街金融（Wall Street Equity Research）的双语翻译与投研专家。用户正在进行深度英语精读练习，并尝试翻译了一段专业外媒报道。
+请对用户的中文翻译进行严谨、专业、建设性的批改点评：
+
+【英文原文】：
+${rawEnglish}
+
+【用户译文】：
+${userTrans}
+
+请直接输出规范的 HTML 片段（无需外部 html/body 标签，可使用 strong, span, p, ul, li）：
+<div class="ai-feedback-inner">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+    <strong style="font-size:15px;color:#0f172a;">🎯 综合评分：</strong>
+    <span class="ai-score-badge">X 分 / 100</span>
+  </div>
+  <p style="margin-bottom:10px;color:#334155;"><strong>评语总述：</strong>[简要评价翻译准确度、通顺度与亮点]</p>
+  <div style="margin-bottom:10px;">
+    <strong style="color:#2563eb;">💡 术语与句式精析：</strong>
+    <ul style="padding-left:18px;margin-top:4px;color:#475569;">
+      <li>[针对专业术语（如融资、估值、AI技术）的翻译准绳与建议]</li>
+      <li>[针对长难句、逻辑从句的理解点评]</li>
+    </ul>
+  </div>
+  <div style="background:#f0fdf4;border-left:3px solid #10b981;padding:10px 12px;border-radius:0 6px 6px 0;">
+    <strong style="color:#047857;">💎 专家级润色译文：</strong>
+    <p style="margin-top:4px;color:#1e293b;line-height:1.7;">[给出信达雅的专业中文译文]</p>
+  </div>
+</div>`;
+
+  try {
+    let responseText = '';
+    if (provider === 'gemini') {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt }] }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || 'Gemini API Error');
+      responseText = data.candidates[0].content.parts[0].text;
+    } else {
+      // OpenAI / DeepSeek compatible
+      const base = provider === 'deepseek' ? 'https://api.deepseek.com/v1' : 'https://api.openai.com/v1';
+      const model = provider === 'deepseek' ? 'deepseek-chat' : 'gpt-4o-mini';
+      const res = await fetch(`${base}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: 'user', content: systemPrompt }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || 'API Error');
+      responseText = data.choices[0].message.content;
+    }
+
+    // Clean up markdown code fences if AI returned ```html ... ```
+    responseText = responseText.replace(/^```html\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '').trim();
+    resultBox.innerHTML = `
+      <h4>🤖 AI 导师批改点评报告</h4>
+      ${responseText}
+    `;
+  } catch (err) {
+    resultBox.innerHTML = `
+      <h4>⚠️ AI 请求出错</h4>
+      <p style="color:#e11d48;margin-bottom:8px;">错误原因：${err.message}</p>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="openAISettingsModal()">重新配置 Key</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyAIPrompt(${pIdx})">改为复制给外部 AI 批改</button>
+      </div>
+    `;
+  }
+}
+
 window.speechSynthesis.onvoiceschanged = () => {};
 renderArticleTabs();
 selectArticle(0);
@@ -1341,5 +1773,44 @@ buildVocabDeck("all");
 renderShadowTabs();
 loadShadow(0);
 </script>
+
+<!-- AI Settings Modal -->
+<div class="modal-overlay" id="ai-settings-modal" onclick="closeAISettingsModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🤖 AI 翻译批改导师配置</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeAISettingsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px;">
+        配置后，在每段英文下方点击<strong>「🤖 AI 核对与点评」</strong>，即可在网页内直接获得 AI 针对准确度、金融创投专业术语与专家级润色的即时深度批改！
+      </p>
+      
+      <label style="font-weight:600;color:#0f172a;">AI 服务提供商：</label>
+      <select id="ai-provider" onchange="updateProviderHint()">
+        <option value="gemini">Google Gemini (推荐 · 免费高速)</option>
+        <option value="deepseek">DeepSeek (OpenAI 兼容)</option>
+        <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+      </select>
+
+      <label style="font-weight:600;color:#0f172a;">API Key：</label>
+      <input type="password" id="ai-key-input" placeholder="粘贴你的 API Key (例如 AIzaSy... 或 sk-...)" />
+
+      <div id="ai-key-hint" style="font-size:12px;color:#2563eb;background:#eff6ff;padding:8px 10px;border-radius:6px;margin-bottom:14px;">
+        💡 <strong>如何获取免费 Key：</strong>前往 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#2563eb;text-decoration:underline;">Google AI Studio</a> 登录 Google 账号即可一键免费创建 Gemini API Key，无任何费用！
+      </div>
+
+      <p style="font-size:11.5px;color:#94a3b8;margin-bottom:16px;">
+        🔒 隐私保证：你的 API Key 仅保存在你当前设备的浏览器本地 (localStorage)，绝不会上传到任何第三方服务器。
+      </p>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="closeAISettingsModal()">取消</button>
+        <button class="btn btn-primary btn-sm" onclick="saveAISettings()">💾 保存设置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
