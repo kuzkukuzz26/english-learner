@@ -1717,22 +1717,75 @@ ${userTrans}
   try {
     let responseText = '';
     if (provider === 'gemini') {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey.trim())}`;
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: systemPrompt }] }]
-        })
-      });
-      const data = await res.json();
-      if (data.error) {
-        throw new Error(data.error.message || 'Gemini 接口报错，请检查 Key 或网络连接');
+      const cleanKey = encodeURIComponent(apiKey.trim());
+      const modelListToTry = [];
+
+      // 1. 优先尝试从 Google 官方 ListModels 动态获取该账号当前可用且支持 generateContent 的模型
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${cleanKey}`);
+        const listData = await listRes.json();
+        if (listData.models && Array.isArray(listData.models)) {
+          const validModels = listData.models
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+
+          // 按推荐优先级排序：优先 2.5-flash / 2.0-flash / 1.5-flash
+          validModels.sort((a, b) => {
+            const getPriority = (name) => {
+              if (name.includes('2.5-flash')) return 1;
+              if (name.includes('2.0-flash')) return 2;
+              if (name.includes('1.5-flash-latest')) return 3;
+              if (name.includes('1.5-flash')) return 4;
+              if (name.includes('flash')) return 5;
+              return 10;
+            };
+            return getPriority(a) - getPriority(b);
+          });
+
+          if (validModels.length > 0) {
+            modelListToTry.push(...validModels);
+          }
+        }
+      } catch (e) {
+        console.warn('动态获取模型列表失败，进入默认模型备选池:', e);
       }
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
-        throw new Error('AI 未返回有效内容（可能触发了安全拦截），请换一段试译重试');
+
+      // 如果动态获取为空或被限制，提供常见主流备选模型
+      if (modelListToTry.length === 0) {
+        modelListToTry.push('gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-pro');
       }
-      responseText = data.candidates[0].content.parts[0].text;
+
+      let lastErr = null;
+      let success = false;
+      for (const modelName of modelListToTry) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${cleanKey}`;
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+          });
+          const data = await res.json();
+          if (data.error) {
+            // 如果是该模型不可用 (404)，继续尝试下一个模型
+            lastErr = new Error(data.error.message || `模型 ${modelName} 响应异常`);
+            continue;
+          }
+          if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+            responseText = data.candidates[0].content.parts[0].text;
+            success = true;
+            break;
+          }
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+
+      if (!success) {
+        throw lastErr || new Error('所有可用 Gemini 模型均未能成功响应，请检查 API Key 是否有效或网络环境');
+      }
     } else {
       // OpenAI / DeepSeek compatible
       const base = provider === 'deepseek' ? 'https://api.deepseek.com/v1' : 'https://api.openai.com/v1';
